@@ -874,13 +874,13 @@ function lkKey(k){if(k==="⌫"){LK.v=LK.v.slice(0,-1);lkDraw();return;}if(LK.v.l
 function lockBuild(){if(document.getElementById("lockOv"))return;
  var ov=document.createElement("div");ov.id="lockOv";
  ov.style.cssText="position:fixed;left:0;top:0;right:0;bottom:0;background:var(--bg);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box";
- ov.innerHTML='<div style="font-weight:800;font-size:22px;margin-bottom:6px">Break Even</div><div id="lkMsg" style="color:var(--mut);margin-bottom:18px">Enter your PIN</div><div id="lkDots" style="display:flex;gap:14px;margin-bottom:24px"></div><div id="lkPad" style="display:grid;grid-template-columns:repeat(3,72px);gap:14px"></div>';
+ ov.innerHTML='<div style="font-weight:800;font-size:22px;margin-bottom:6px">Break Even</div><div id="lkMsg" style="color:var(--mut);margin-bottom:18px">Enter your PIN</div><div id="lkDots" style="display:flex;gap:14px;margin-bottom:24px"></div><div id="lkPad" style="display:grid;grid-template-columns:repeat(3,72px);gap:14px"></div><button id="lkFid" class="p" style="display:none;margin-top:18px;max-width:260px">Unlock with Face ID</button><div id="lkFidMsg" style="color:#b00;font-size:13px;margin-top:8px;min-height:16px"></div>';
  document.body.appendChild(ov);
  var d=document.getElementById("lkDots");for(var i=0;i<4;i++){var sp=document.createElement("span");sp.style.cssText="width:14px;height:14px;border-radius:50%;border:2px solid var(--ac);display:inline-block";d.appendChild(sp);}
  var pad=document.getElementById("lkPad");["1","2","3","4","5","6","7","8","9","","0","⌫"].forEach(function(k){var b=document.createElement("button");
   if(k===""){b.style.visibility="hidden";}else{b.textContent=k;b.style.cssText="width:72px;height:72px;border-radius:50%;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:24px;font-weight:600;cursor:pointer";b.onclick=function(){lkKey(k);};}
   pad.appendChild(b);});}
-function lockShow(){lockBuild();LK.v="";lkDraw();document.getElementById("lkMsg").textContent="Enter your PIN";document.getElementById("lockOv").style.display="flex";}
+function lockShow(){lockBuild();LK.v="";lkDraw();document.getElementById("lkMsg").textContent="Enter your PIN";document.getElementById("lockOv").style.display="flex";var fb=document.getElementById("lkFid");if(fb){fb.style.display=(fidGet()&&fidSupported())?"":"none";fb.onclick=fidUnlock;}}
 function lockHide(){LK.v="";var o=document.getElementById("lockOv");if(o)o.style.display="none";}
 function pinModal(title,ph,okText,cb){var ov=document.createElement("div");ov.id="pinModalOv";ov.style.cssText="position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:210;padding:16px;box-sizing:border-box";
  var box=document.createElement("div");box.style.cssText="background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;max-width:320px;width:100%;text-align:center";
@@ -895,9 +895,24 @@ function pinModal(title,ph,okText,cb){var ov=document.createElement("div");ov.id
  ok.onclick=function(){cb(i.value.trim(),function(err){if(err){m.textContent=err;}else close();});};
  ov.onclick=function(e){if(e.target===ov)close();};
  row.appendChild(ok);row.appendChild(cn);box.appendChild(h);box.appendChild(i);box.appendChild(m);box.appendChild(row);ov.appendChild(box);document.body.appendChild(ov);i.focus();}
+function fidSupported(){try{return !!(window.PublicKeyCredential&&navigator.credentials&&navigator.credentials.create&&navigator.credentials.get&&location.hostname);}catch(e){return false;}}
+function fidGet(){try{return localStorage.getItem("be-fid")||"";}catch(e){return "";}}
+function fidStore(v){try{if(v)localStorage.setItem("be-fid",v);else localStorage.removeItem("be-fid");}catch(e){}}
+function b64u(buf){var b=new Uint8Array(buf),t="";for(var i=0;i<b.length;i++)t+=String.fromCharCode(b[i]);return btoa(t).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
+function unb64u(str){str=str.replace(/-/g,"+").replace(/_/g,"/");while(str.length%4)str+="=";var t=atob(str),a=new Uint8Array(t.length);for(var i=0;i<t.length;i++)a[i]=t.charCodeAt(i);return a;}
+function rnd(n){return crypto.getRandomValues(new Uint8Array(n));}
+function fidRegister(done){navigator.credentials.create({publicKey:{challenge:rnd(32),rp:{name:"Break Even",id:location.hostname},
+  user:{id:rnd(16),name:"break-even",displayName:"Break Even"},pubKeyCredParams:[{type:"public-key",alg:-7},{type:"public-key",alg:-257}],
+  authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required",residentKey:"preferred"},timeout:60000}})
+ .then(function(c){fidStore(b64u(c.rawId));done(null);}).catch(function(e){done("Face ID setup didn’t finish. "+(e&&e.name==="NotAllowedError"?"It was cancelled.":"Try again."));});}
+function fidUnlock(){var id=fidGet(),m=document.getElementById("lkFidMsg");if(!id||!fidSupported())return;
+ if(m)m.textContent="";
+ navigator.credentials.get({publicKey:{challenge:rnd(32),rpId:location.hostname,allowCredentials:[{type:"public-key",id:unb64u(id)}],userVerification:"required",timeout:60000}})
+ .then(function(){lockHide();}).catch(function(){if(m)m.textContent="Face ID didn’t work. Use your PIN.";});}
 function lkRender(){var el=document.getElementById("lkSet");if(!el)return;el.innerHTML="";var on=!!pinGet();
  var msg=document.createElement("div");msg.style.cssText="color:var(--mut);font-size:14px;margin-bottom:10px";
  msg.textContent=on?"The lock is on. The app asks for your PIN when it opens or comes back from the background.":"The lock is off. Create a 4-digit PIN to lock the app.";el.appendChild(msg);
+ var m=document.createElement("div");m.style.cssText="color:#b00;font-size:13px;margin-bottom:8px";
  var b=document.createElement("button");b.className="p";b.style.marginTop="0";
  if(!on){b.textContent="Create PIN";b.onclick=function(){pinModal("Create PIN","New 4-digit PIN","Next",function(v,done){
     if(!/^\d{4}$/.test(v)){done("PIN must be 4 digits.");return;}
@@ -907,8 +922,14 @@ function lkRender(){var el=document.getElementById("lkSet");if(!el)return;el.inn
       pinStore(pinHash(v));done2(null);lkRender();});});};}
  else{b.textContent="Turn off lock";b.onclick=function(){pinModal("Turn off lock","Current PIN","Turn off",function(v,done){
     if(pinHash(v)!==pinGet()){done("Wrong PIN.");return;}
-    pinStore("");done(null);lkRender();});};}
- el.appendChild(b);}
+    pinStore("");fidStore("");done(null);lkRender();});};}
+ el.appendChild(b);
+ if(on&&fidSupported()){var f=document.createElement("button");f.className="p";f.style.marginTop="8px";
+  if(fidGet()){f.textContent="Turn off Face ID";f.style.background="#c62828";f.onclick=function(){fidStore("");lkRender();};}
+  else{f.textContent="Turn on Face ID";f.onclick=function(){m.textContent="";fidRegister(function(err){if(err){m.textContent=err;return;}lkRender();});};}
+  el.appendChild(f);el.appendChild(m);}
+ else if(on){var n=document.createElement("div");n.style.cssText="color:var(--mut);font-size:13px;margin-top:8px";n.textContent="Face ID needs Safari on this site (the GitHub Pages address).";el.appendChild(n);}
+}
 lkRender();
 if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
