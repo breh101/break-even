@@ -195,6 +195,7 @@ h2{display:block;text-align:center;justify-content:center}
 <button class="p" id="rs">Restore from pasted backup</button>
 <div id="bkm" style="color:var(--mut);font-size:13px;margin-top:6px"></div>
 </div>
+<div class="card"><h2>Cloud sign-in</h2><button class="p" id="sbSignBtn">Sign in to sync</button><div style="color:var(--mut);font-size:13px;margin-top:6px">Sign in once on each device. Your budget then syncs to your account.</div></div>
 <div class="card"><h2>App lock</h2><div id="lkSet"></div></div>
 <div class="card"><h2>Spending breakdown</h2>
 <div class="row" style="flex-wrap:nowrap"><button class="nav" id="bp" aria-label="Previous month">‹</button><div id="blabel" style="text-align:center;align-self:center;font-weight:600"></div><button class="nav" id="bnx" aria-label="Next month">›</button></div>
@@ -708,7 +709,7 @@ migratePf();migrateFf();migrateMvFund();buildAcc();tog();render();
 (function(){var keep=function(fn){return function(){var y=window.scrollY||0;try{return fn.apply(this,arguments);}finally{try{window.scrollTo(0,y);}catch(e){}}};};
  render=keep(render);renderBills=keep(renderBills);buildAcc=keep(buildAcc);buildCats=keep(buildCats);renderVB=keep(renderVB);buildPlan=keep(buildPlan);})();
 var PAGES=[["home","Overview"],["bills","Bills"],["cats","Categories"],["backup","Backup & sync"]];
-var CPMAP={"Monthly Overview":"home","Accounts":"home","Entries":"home","Backup":"backup","App lock":"backup","Categories":"cats","Monthly plan":"gone","Spending breakdown":"gone"};
+var CPMAP={"Monthly Overview":"home","Accounts":"home","Entries":"home","Backup":"backup","App lock":"backup","Cloud sign-in":"backup","Categories":"cats","Monthly plan":"gone","Spending breakdown":"gone"};
 function cardPage(c){var hh=c.querySelector("h2");var t="";if(hh){[].forEach.call(hh.childNodes,function(n){if(n.nodeType===3)t+=n.textContent;});t=t.trim();}return CPMAP[t]||"gone";}
 var cur="home";
 function buildMenu(){var mn=$("menu");mn.innerHTML="";PAGES.filter(function(g){return MENUP.indexOf(g[0])>-1;}).forEach(function(g){var b=document.createElement("button");b.className="mi"+(g[0]===cur?" on":"");b.textContent=g[1];b.onclick=function(){showPage(g[0]);};mn.appendChild(b);});}
@@ -815,12 +816,38 @@ if(cu===lu){cmsg("Cloud save: up to date.");return;}}}
 cpush();
 }).catch(function(e){cmsg("Cloud save unavailable ("+((e&&e.code)||"error")+"). Your data stays on this device.");});}
 function cloudInit(){try{
-if(!window.claude||!window.claude.use){cmsg("Cloud save isn’t available here. Open the app from its claude.ai link.");return;}
+if(!window.claude||!window.claude.use){sbInit();return;}
 Promise.race([Promise.all([window.claude.use("db"),window.claude.use("user")]),new Promise(function(res,rej){setTimeout(function(){rej(new Error("timeout"));},10000);})]).then(function(r){var db=r[0],u=r[1];
 if(!db||!u){cmsg("Cloud save isn’t available in this view. Your data stays on this device.");return;}
 return u.id().then(function(id){if(!id){cmsg("Cloud save needs you to be signed in to Claude.");return;}CL.ref=db.collection("data/users/"+id).doc("tracker");csync();});
 }).catch(function(e){cmsg(e&&e.message==="timeout"?"Cloud connection timed out. Your data is on this device only. Tap Sync now to retry.":"Cloud save unavailable. Your data stays on this device.");});}catch(e){cmsg("Cloud save unavailable ("+((e&&e.message)||"error")+"). Your data stays on this device.");}}
 $("csyncb").onclick=function(){if(CL.ref)csync();else cloudInit();};
+/* ---- Supabase sync (GitHub Pages version) ---- */
+var SB_URL="https://nhowjmtbcgxuodozhmgi.supabase.co",SB_KEY="sb_publishable_7wL325KVcniYYGPEVTdk_A_N_Fcixr0",SBC=null;
+function sbLoad(cb){if(window.supabase){cb();return;}var s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.js";s.onload=function(){cb();};s.onerror=function(){cmsg("Cloud save unavailable (the sync library didn’t load). Your data stays on this device.");};document.head.appendChild(s);}
+function sbClient(){if(!SBC)SBC=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true}});return SBC;}
+function sbRef(uid){var c=sbClient();return {
+ get:function(){return c.from("budget_data").select("data,updated_at").eq("user_id",uid).maybeSingle().then(function(r){if(r.error)throw r.error;var row=r.data;return {exists:!!row,data:function(){var d=row&&row.data;return d?{json:d.json||null,updatedAt:d.updatedAt||0}:null;}};});},
+ set:function(v){return c.from("budget_data").upsert({user_id:uid,data:{json:v.json,updatedAt:v.updatedAt},updated_at:new Date().toISOString()}).then(function(r){if(r.error)throw r.error;});}};}
+function sbInit(){sbLoad(function(){try{sbClient().auth.getSession().then(function(r){var ses=r.data&&r.data.session;if(!ses){cmsg("Sign in to sync your data (Backup → Cloud sign-in).");return;}CL.ref=sbRef(ses.user.id);csync();}).catch(function(){cmsg("Cloud save unavailable. Your data stays on this device.");});}catch(e){cmsg("Cloud save unavailable. Your data stays on this device.");}});}
+function sbModal(){var ov=document.createElement("div");ov.id="sbModalOv";ov.style.cssText="position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:210;padding:16px;box-sizing:border-box";
+ var box=document.createElement("div");box.style.cssText="background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;max-width:320px;width:100%;text-align:center";
+ var h=document.createElement("div");h.style.cssText="font-weight:800;font-size:16px;margin-bottom:10px";h.textContent="Sign in to sync";
+ var em=document.createElement("input");em.type="email";em.placeholder="Email";em.autocomplete="username";
+ var pw=document.createElement("input");pw.type="password";pw.placeholder="Password";pw.autocomplete="current-password";
+ [em,pw].forEach(function(i){i.style.cssText="max-width:240px;width:100%;display:block;margin:0 auto 8px;text-align:center";});
+ var m=document.createElement("div");m.style.cssText="color:#b00;font-size:13px;min-height:18px";
+ var row=document.createElement("div");row.style.cssText="display:flex;flex-direction:column;gap:8px;margin-top:8px";
+ var ok=document.createElement("button");ok.className="p";ok.textContent="Sign in";
+ var cn=document.createElement("button");cn.textContent="Cancel";cn.style.cssText="width:100%;margin:0;background:#c62828;color:#fff;border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer";
+ function close(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
+ cn.onclick=close;ov.onclick=function(e){if(e.target===ov)close();};
+ ok.onclick=function(){m.style.color="var(--mut)";m.textContent="Signing in…";sbLoad(function(){sbClient().auth.signInWithPassword({email:em.value.trim(),password:pw.value}).then(function(r){
+   if(r.error){m.style.color="#b00";m.textContent="Sign-in failed: "+r.error.message;return;}
+   CL.ref=sbRef(r.data.user.id);close();csync();}).catch(function(){m.style.color="#b00";m.textContent="Sign-in failed. Check your connection.";});});};
+ row.appendChild(ok);row.appendChild(cn);box.appendChild(h);box.appendChild(em);box.appendChild(pw);box.appendChild(m);box.appendChild(row);ov.appendChild(box);document.body.appendChild(ov);em.focus();}
+var sbBtn=document.getElementById("sbSignBtn");if(sbBtn)sbBtn.onclick=sbModal;
+
 })();
 
 /* ---- swipe between screens ---- */
