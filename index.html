@@ -787,7 +787,7 @@ function catRow(c){var r=document.createElement("div");r.style.cssText="border-t
  r.appendChild(n);r.appendChild(btn("\u22ef",function(){catSheet(c);}));return r;}
 function buildCats(){var el=$("catList");el.innerHTML="";
  groups().forEach(function(g){
-  if(g[0]){var hd=document.createElement("div");hd.className="sub"+secCls(g[0]);hd.style.cssText="display:flex;align-items:center;gap:10px;font-size:18px;text-transform:none;letter-spacing:0;color:var(--ac);margin:16px -14px 6px;padding:6px 28px 6px 24px";
+  if(g[0]){var hd=document.createElement("div");hd.className="sub"+secCls(g[0]);hd.style.cssText="display:flex;align-items:center;gap:10px;font-size:18px;text-transform:none;letter-spacing:0;color:var(--gold);margin:16px -14px 6px;padding:6px 28px 6px 24px";
    var sn=document.createElement("span");sn.textContent=g[0];sn.style.cssText="flex:1;min-width:0;overflow-wrap:break-word";hd.appendChild(sn);
    if(g[0]!=="Ungrouped")hd.appendChild(btn("\u22ef",function(){secSheet(g[0]);}));
    el.appendChild(hd);}
@@ -935,7 +935,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-22b",busy=false;
+(function(){var APP_BUILD="2026-11-22c",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
