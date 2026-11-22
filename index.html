@@ -933,6 +933,20 @@ function lkRender(){var el=document.getElementById("lkSet");if(!el)return;el.inn
 lkRender();
 if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
+
+/* ---- check for a newer deployed version and reload ---- */
+(function(){var APP_BUILD="2026-11-22a",busy=false;
+function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
+function check(){if(busy)return;busy=true;
+ fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
+  if(!j||!j.build||j.build===APP_BUILD)return;
+  if(overlayOpen())return;
+  var key="be-reloaded-"+j.build;try{if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,"1");}catch(e){}
+  location.replace(location.pathname+"?v="+encodeURIComponent(j.build));
+ }).catch(function(){busy=false;});}
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")check();});
+window.addEventListener("pageshow",check);
+check();})();
 </script>
 </body>
 </html>
