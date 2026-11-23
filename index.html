@@ -62,6 +62,8 @@ h2{color:var(--gold);padding-bottom:6px;border-bottom:2px solid var(--gold);font
 .stat.key small{color:var(--gold);font-weight:700}
 .track i{background:var(--ac)}
 .top h1{color:var(--ac)}
+.tbrand{flex:1;display:flex;align-items:center;justify-content:center;gap:8px}
+.tbrand h1{flex:none}
 #exp{color:var(--ac)}
 .sub{color:var(--gold);font-weight:700}
 .k-checking{--kc:var(--ac)}.k-fund{--kc:var(--gold)}.k-card{--kc:var(--slate)}
@@ -84,7 +86,7 @@ h2{display:block;text-align:center;justify-content:center}
 </head>
 <body>
 <main>
-<div class="top"><h1 id="ptitle">Break Even</h1></div>
+<div class="top"><div class="tbrand"><img src="apple-touch-icon.png" alt="" width="28" height="28" style="border-radius:7px;flex:none"><h1 id="ptitle">Break Even</h1></div></div>
 <div class="menu" id="menu" style="display:none"></div>
 
 <div class="card">
@@ -718,7 +720,7 @@ var TABN={home:"Home",plan:"Plan",spend:"Spending",cats:"Categories",backup:"Bac
 var TABP=["home","bills","cats","backup"],MENUP=[];
 function buildTabs(){var t=$("tabs");t.innerHTML="";PAGES.filter(function(g){return TABP.indexOf(g[0])>-1;}).forEach(function(g){var b=document.createElement("button");b.setAttribute("data-p",g[0]);b.innerHTML='<span class="ic">'+TABI[g[0]]+'</span><span>'+TABN[g[0]]+'</span>';b.onclick=function(){showPage(g[0]);};t.appendChild(b);});}
 var SCR={};
-function showPage(p){try{SCR[cur]=window.scrollY||0;}catch(e){}cur=p;try{$("pageBills").style.display=p==="bills"?"":"none";if(p==="bills")renderBills();}catch(e){}try{[].forEach.call($("tabs").children,function(b){b.className=b.getAttribute("data-p")===p?"on":"";});}catch(e){}try{sessionStorage.setItem("be-page",p);}catch(e){}cards.forEach(function(c){c.style.display=cardPage(c)===p?"":"none";});PAGES.forEach(function(g){if(g[0]===p)$("ptitle").textContent="Break Even";$("ptitle").style.visibility=p==="home"?"visible":"hidden";try{$("ham").style.visibility=p==="home"?"visible":"hidden";}catch(e){}});$("menu").style.display="none";try{window.scrollTo(0,SCR[p]||0);}catch(e){}}
+function showPage(p){try{SCR[cur]=window.scrollY||0;}catch(e){}cur=p;try{$("pageBills").style.display=p==="bills"?"":"none";if(p==="bills")renderBills();}catch(e){}try{[].forEach.call($("tabs").children,function(b){b.className=b.getAttribute("data-p")===p?"on":"";});}catch(e){}try{sessionStorage.setItem("be-page",p);}catch(e){}cards.forEach(function(c){c.style.display=cardPage(c)===p?"":"none";});PAGES.forEach(function(g){if(g[0]===p)$("ptitle").textContent="Break Even";$("ptitle").style.visibility="visible";try{$("ham").style.visibility=p==="home"?"visible":"hidden";}catch(e){}});$("menu").style.display="none";try{window.scrollTo(0,SCR[p]||0);}catch(e){}}
 function setupHams(){var first={};cards.forEach(function(c){var p=cardPage(c);if(p&&!first[p])first[p]=c;});
  var pb=$("pageBills");var bc=pb?[].filter.call(pb.children,function(n){return n.classList&&n.classList.contains("card");})[0]:null;if(bc)first.bills=bc;
  Object.keys(first).forEach(function(p){var c=first[p];var h2=c.querySelector("h2");if(!h2||h2.parentNode!==c)return;var w=document.createElement("div");w.className="hwrap";c.insertBefore(w,h2);w.appendChild(h2);var b=document.createElement("button");b.className="ham";b.setAttribute("aria-label","Menu");b.textContent="\u2630";w.appendChild(b);});
@@ -934,7 +936,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-22g",busy=false;
+(function(){var APP_BUILD="2026-11-22h",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
