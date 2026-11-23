@@ -213,10 +213,12 @@ h2{display:block;text-align:center;justify-content:center}
 <div class="sub" style="margin-top:0">Add a section</div>
 <div class="row"><input type="text" id="nsec" placeholder="New section, e.g. Housing"></div>
 <button class="p" id="asec">Save section</button>
+<button id="secCancel" style="width:100%;margin-top:8px;background:#c62828;color:#fff;border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer">Cancel</button>
 </div>
 <div id="catWrap" style="display:none;margin-top:8px">
 <div class="row"><input type="text" id="ncat" placeholder="New category"><select id="ncsec" aria-label="Section"></select></div>
 <button class="p" id="acat">Save category</button>
+<button id="catCancel" style="width:100%;margin-top:8px;background:#c62828;color:#fff;border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer">Cancel</button>
 </div>
 </div>
 <section id="pageBills" style="display:none">
@@ -380,7 +382,7 @@ function openFormSheet(key,formId,title){if(FSHEET[key])return;var f=$(formId);i
  var hd=document.createElement("div");hd.style.cssText="font-weight:800;font-size:16px;margin-bottom:8px;text-align:center";hd.textContent=title;var homeP=f.parentNode,homeN=f.nextSibling;box.appendChild(hd);box.appendChild(f);ov.appendChild(box);
  FSHEET[key]={ov:ov,home:homeP,next:homeN,id:formId};document.body.appendChild(ov);
  ov.onclick=function(e){if(e.target===ov)closeFormSheet(key);};}
-function closeFormSheet(key){var s=FSHEET[key];if(!s)return;var f=$(s.id);if(f&&s.home)s.home.insertBefore(f,s.next);if(f&&(key==="acct"||key==="entries"||key==="bills"||key==="budgets"))f.style.display="none";if(s.ov.parentNode)s.ov.parentNode.removeChild(s.ov);delete FSHEET[key];}
+function closeFormSheet(key){var s=FSHEET[key];if(!s)return;var f=$(s.id);if(f&&s.home)s.home.insertBefore(f,s.next);if(f&&(key==="acct"||key==="entries"||key==="bills"||key==="budgets"||key==="sections"||key==="categories"))f.style.display="none";if(s.ov.parentNode)s.ov.parentNode.removeChild(s.ov);delete FSHEET[key];}
 function restoreBillForm(){closeFormSheet("bills");}
 function openBillSheet(title){openFormSheet("bills","bForm",title);}
 function fillBCat(v){var s=$("bcat");s.innerHTML="";var mk=function(c,p){var o=document.createElement("option");o.value=o.textContent=c;p.appendChild(o);};if(S.secs.length){groups().forEach(function(g){var og=document.createElement("optgroup");og.label=g[0];g[1].forEach(function(c){mk(c,og);});s.appendChild(og);});}else CATS.forEach(function(c){mk(c,s);});var all=[].map.call(s.options,function(o){return o.value;});s.value=v&&all.indexOf(v)>-1?v:(all.indexOf("Misc")>-1?"Misc":(all[0]||""));}
@@ -738,7 +740,7 @@ groups().forEach(function(g){var sub={},st=0;g[1].forEach(function(c){if(map[c])
 var rest={},rt=0;Object.keys(map).forEach(function(c){if(!used[c]){rest[c]=map[c];rt+=map[c];}});if(rt)sec("Other",rest,rt);
 if(!el.children.length)bars(el,map,tot,pl);}
 function afterCats(){if(SP.length)buildSp();buildPlan();loadPlanInputs();buildCats();fillCat($("type").value);render();}
-function addCat(inp,arr){var v=inp.value.trim();if(!v){inp.focus();return;}if(arr.some(function(z){return z.toLowerCase()===v.toLowerCase();})){inp.value="";return;}arr.push(v);inp.value="";save();afterCats();}
+function addCat(inp,arr){var v=inp.value.trim();if(!v){inp.focus();return;}if(arr.some(function(z){return z.toLowerCase()===v.toLowerCase();})){inp.value="";return;}arr.push(v);inp.value="";save();afterCats();closeFormSheet("categories");}
 function btn(txt,fn){var b=document.createElement("button");b.className="mvb";b.textContent=txt;b.onclick=fn;return b;}
 function moveCat(c,d){var i=S.cats.indexOf(c),j=i+d,s=secOf(c);while(j>=0&&j<S.cats.length&&secOf(S.cats[j])!==s)j+=d;if(j<0||j>=S.cats.length)return;var t=S.cats[i];S.cats[i]=S.cats[j];S.cats[j]=t;save();afterCats();}
 function moveSec(i,d){var j=i+d;if(j<0||j>=S.secs.length)return;var t=S.secs[i];S.secs[i]=S.secs[j];S.secs[j]=t;save();afterCats();}
@@ -794,9 +796,11 @@ function buildCats(){var el=$("catList");el.innerHTML="";
   g[1].forEach(function(c){el.appendChild(catRow(c));});});}
 $("acat").onclick=function(){var v=$("ncat").value.trim(),sc=$("ncsec").value,isNew=v&&!S.cats.some(function(z){return z.toLowerCase()===v.toLowerCase();});addCat($("ncat"),S.cats);if(isNew&&sc&&sc!=="Ungrouped"){S.cmap[v]=sc;save();afterCats();}};
 function togWrap(id,btn,label){var w=$(id),o=w.style.display==="none";w.style.display=o?"":"none";btn.textContent=o?"Cancel":label;}
-$("osec").onclick=function(){togWrap("secWrap",this,"+ Add section");};
-$("ocat").onclick=function(){togWrap("catWrap",this,"+ Add category");};
-$("asec").onclick=function(){var v=$("nsec").value.trim();if(!v||v.toLowerCase()==="ungrouped"){$("nsec").focus();return;}if(!S.secs.some(function(z){return z.toLowerCase()===v.toLowerCase();}))S.secs.push(v);$("nsec").value="";save();afterCats();};
+$("osec").onclick=function(){openFormSheet("sections","secWrap","Add section");};
+$("ocat").onclick=function(){openFormSheet("categories","catWrap","Add category");};
+$("secCancel").onclick=function(){$("nsec").value="";closeFormSheet("sections");};
+$("catCancel").onclick=function(){$("ncat").value="";closeFormSheet("categories");};
+$("asec").onclick=function(){var v=$("nsec").value.trim();if(!v||v.toLowerCase()==="ungrouped"){$("nsec").focus();return;}if(!S.secs.some(function(z){return z.toLowerCase()===v.toLowerCase();}))S.secs.push(v);$("nsec").value="";save();afterCats();closeFormSheet("sections");};
 $("bp").onclick=function(){$("mp").onclick();};
 $("bnx").onclick=function(){$("mn").onclick();};
 buildCats();var sp0="home";try{sp0=sessionStorage.getItem("be-page")||"home";}catch(e){}if(!PAGES.some(function(g){return g[0]===sp0;}))sp0="home";buildTabs();showPage(sp0);
@@ -935,7 +939,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-22c",busy=false;
+(function(){var APP_BUILD="2026-11-22d",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
