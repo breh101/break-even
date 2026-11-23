@@ -455,7 +455,7 @@ function renderVB(){var el=$("vbList");el.innerHTML="";var ym=BMON;var vc=$("vbc
   var tr=document.createElement("div");tr.className="track";tr.style.marginTop="6px";var i=document.createElement("i");i.style.width=Math.max(0,Math.min(100,ea>0?sp/ea*100:0))+"%";if(rem<0)i.style.background="var(--neg)";tr.appendChild(i);
   var bot=document.createElement("div");bot.style.cssText="display:grid;grid-template-columns:minmax(0,1fr) 40px 84px;gap:8px;align-items:center;margin-top:6px;font-size:13px;color:var(--mut)";var rl=document.createElement("span");rl.textContent=rem<0?"over by "+$$(-rem):$$(rem)+" left";
   var rm=document.createElement("button");rm.className="rm";rm.style.cssText="margin:0;width:84px;height:40px;padding:0;font-size:13px;white-space:nowrap";rm.textContent="Remove";var armed=false;rm.onclick=function(){if(!armed){armed=true;rm.textContent="Tap again";return;}S.vbudgets=S.vbudgets.filter(function(z){return z!==v;});save();render();renderBills();};
-  var ved=btn("\u270e",function(){VBEDIT=v.id;$("vbn").value=v.name;$("vba").value=String(vbEff(v,BMON));$("vbScopeRow").style.display="";$("vbScope").value="all";openFormSheet("budgets","vbForm","Edit budget");$("vbc").value=v.cat;$("vbsave").textContent="Save changes";$("vbcan").style.display="";});bot.appendChild(rl);bot.appendChild(ved);bot.appendChild(rm);r.appendChild(top);r.appendChild(tr);r.appendChild(bot);el.appendChild(r);});
+  var ved=btn("\u270e",function(){VBEDIT=v.id;$("vbn").value=v.name;$("vba").value=String(vbEff(v,BMON));$("vbScopeRow").style.display="";$("vbScope").value="all";openFormSheet("budgets","vbForm","Edit budget");$("vbc").value=v.cat;$("vbsave").textContent="Save changes";});bot.appendChild(rl);bot.appendChild(ved);bot.appendChild(rm);r.appendChild(top);r.appendChild(tr);r.appendChild(bot);el.appendChild(r);});
  
 }
 function renderBillOpts(){var as=$("bA"),av=as.value;as.innerHTML="";S.accts.forEach(function(x){var o=document.createElement("option");o.value=String(x.id);o.textContent=x.name;as.appendChild(o);});as.value=av||String(fundAccId());
@@ -936,7 +936,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-22i",busy=false;
+(function(){var APP_BUILD="2026-11-22j",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
