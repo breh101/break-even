@@ -213,12 +213,10 @@ h2{display:block;text-align:center;justify-content:center}
 <div class="sub" style="margin-top:0">Add a section</div>
 <div class="row"><input type="text" id="nsec" placeholder="New section, e.g. Housing"></div>
 <button class="p" id="asec">Save section</button>
-<button id="secCancel" style="width:100%;margin-top:8px;background:#c62828;color:#fff;border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer">Cancel</button>
 </div>
 <div id="catWrap" style="display:none;margin-top:8px">
 <div class="row"><input type="text" id="ncat" placeholder="New category"><select id="ncsec" aria-label="Section"></select></div>
 <button class="p" id="acat">Save category</button>
-<button id="catCancel" style="width:100%;margin-top:8px;background:#c62828;color:#fff;border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer">Cancel</button>
 </div>
 </div>
 <section id="pageBills" style="display:none">
@@ -381,7 +379,7 @@ function openFormSheet(key,formId,title){if(FSHEET[key])return;var f=$(formId);i
  var box=document.createElement("div");box.style.cssText="background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;max-width:360px;width:100%;max-height:85vh;overflow:auto";
  var hd=document.createElement("div");hd.style.cssText="font-weight:800;font-size:16px;margin-bottom:8px;text-align:center";hd.textContent=title;var homeP=f.parentNode,homeN=f.nextSibling;box.appendChild(hd);box.appendChild(f);ov.appendChild(box);
  FSHEET[key]={ov:ov,home:homeP,next:homeN,id:formId};document.body.appendChild(ov);
- ov.onclick=function(e){if(e.target===ov)closeFormSheet(key);};}
+ var rs={entries:function(){if(EID!==null)endEdit();},bills:function(){bformReset();},budgets:function(){vbReset();}};var cx=document.createElement("button");cx.textContent="Cancel";cx.style.cssText="width:100%;margin-top:10px;background:#c62828;color:#fff;border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer";cx.onclick=function(){if(rs[key])rs[key]();closeFormSheet(key);};box.appendChild(cx);Array.prototype.forEach.call(f.querySelectorAll("button"),function(b){if(/^cancel/i.test(b.textContent.trim()))b.style.display="none";});}
 function closeFormSheet(key){var s=FSHEET[key];if(!s)return;var f=$(s.id);if(f&&s.home)s.home.insertBefore(f,s.next);if(f&&(key==="acct"||key==="entries"||key==="bills"||key==="budgets"||key==="sections"||key==="categories"))f.style.display="none";if(s.ov.parentNode)s.ov.parentNode.removeChild(s.ov);delete FSHEET[key];}
 function restoreBillForm(){closeFormSheet("bills");}
 function openBillSheet(title){openFormSheet("bills","bForm",title);}
@@ -433,7 +431,7 @@ function showDayBills(ym,dd,rows){var key=ym+"-"+("0"+dd).slice(-2);var list=row
  if(paydayKeys(ym)[key]){var pdr=document.createElement("div");pdr.className="tx";pdr.style.cssText="padding:8px 0";var pdl=document.createElement("span");pdl.textContent="\ud83e\udd11 Payday";var pdb=document.createElement("b");pdb.className="pos";pdb.textContent="";pdr.appendChild(pdl);pdr.appendChild(pdb);box.appendChild(pdr);}
  var cl=document.createElement("button");cl.className="p";cl.textContent="Close";cl.style.marginTop="12px";box.appendChild(cl);
  ov.appendChild(box);document.body.appendChild(ov);
- var close=function(){if(ov.parentNode)ov.parentNode.removeChild(ov);};cl.onclick=close;ov.onclick=function(e){if(e.target===ov)close();};
+ var close=function(){if(ov.parentNode)ov.parentNode.removeChild(ov);};cl.onclick=close;
 }
 function renderCal(ym,rows){var el=$("bCal");el.innerHTML="";var y=+ym.slice(0,4),mo=+ym.slice(5,7)-1;var first=new Date(y,mo,1).getDay();var last=new Date(y,mo+1,0).getDate();
  var grid=document.createElement("div");grid.style.cssText="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px";
@@ -748,7 +746,7 @@ function openSheet(title,fill){var ov=document.createElement("div");ov.style.css
  var box=document.createElement("div");box.style.cssText="background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;max-width:340px;width:100%;max-height:80vh;overflow:auto";
  var hd=document.createElement("div");hd.style.cssText="font-weight:800;font-size:16px;margin-bottom:8px;text-align:center;overflow-wrap:break-word";hd.textContent=title;box.appendChild(hd);
  var body=document.createElement("div");box.appendChild(body);ov.appendChild(box);document.body.appendChild(ov);
- var close=function(){if(ov.parentNode)ov.parentNode.removeChild(ov);};ov.onclick=function(e){if(e.target===ov)close();};
+ var close=function(){if(ov.parentNode)ov.parentNode.removeChild(ov);};var cxs=document.createElement("button");cxs.textContent="Cancel";cxs.style.cssText="width:100%;margin-top:10px;background:#c62828;color:#fff;border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer";cxs.onclick=close;box.appendChild(cxs);
  fill(body,close);}
 function sheetBtn(txt,fn,cls){var b=document.createElement("button");b.className=cls||"p";b.textContent=txt;b.style.cssText="margin:6px 0;display:block;width:100%";if(/remove/i.test(txt)){b.style.background="transparent";b.style.border="0";b.style.color="var(--neg)";}else if(/back|cancel/i.test(txt)){b.style.background="transparent";b.style.border="0";b.style.color="var(--mut)";}b.onclick=fn;return b;}
 function sheetText(t){var d=document.createElement("div");d.textContent=t;d.style.cssText="margin:6px 0;font-size:14px;color:var(--mut)";return d;}
@@ -798,8 +796,6 @@ $("acat").onclick=function(){var v=$("ncat").value.trim(),sc=$("ncsec").value,is
 function togWrap(id,btn,label){var w=$(id),o=w.style.display==="none";w.style.display=o?"":"none";btn.textContent=o?"Cancel":label;}
 $("osec").onclick=function(){openFormSheet("sections","secWrap","Add section");};
 $("ocat").onclick=function(){openFormSheet("categories","catWrap","Add category");};
-$("secCancel").onclick=function(){$("nsec").value="";closeFormSheet("sections");};
-$("catCancel").onclick=function(){$("ncat").value="";closeFormSheet("categories");};
 $("asec").onclick=function(){var v=$("nsec").value.trim();if(!v||v.toLowerCase()==="ungrouped"){$("nsec").focus();return;}if(!S.secs.some(function(z){return z.toLowerCase()===v.toLowerCase();}))S.secs.push(v);$("nsec").value="";save();afterCats();closeFormSheet("sections");};
 $("bp").onclick=function(){$("mp").onclick();};
 $("bnx").onclick=function(){$("mn").onclick();};
@@ -845,7 +841,7 @@ function sbModal(){var ov=document.createElement("div");ov.id="sbModalOv";ov.sty
  var ok=document.createElement("button");ok.className="p";ok.textContent="Sign in";
  var cn=document.createElement("button");cn.textContent="Cancel";cn.style.cssText="width:100%;margin:0;background:#c62828;color:#fff;border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer";
  function close(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
- cn.onclick=close;ov.onclick=function(e){if(e.target===ov)close();};
+ cn.onclick=close;
  ok.onclick=function(){m.style.color="var(--mut)";m.textContent="Signing in…";sbLoad(function(){sbClient().auth.signInWithPassword({email:em.value.trim(),password:pw.value}).then(function(r){
    if(r.error){m.style.color="#b00";m.textContent="Sign-in failed: "+r.error.message;return;}
    CL.ref=sbRef(r.data.user.id);close();csync();}).catch(function(){m.style.color="#b00";m.textContent="Sign-in failed. Check your connection.";});});};
@@ -897,7 +893,6 @@ function pinModal(title,ph,okText,cb){var ov=document.createElement("div");ov.id
  function close(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
  cn.onclick=close;
  ok.onclick=function(){cb(i.value.trim(),function(err){if(err){m.textContent=err;}else close();});};
- ov.onclick=function(e){if(e.target===ov)close();};
  row.appendChild(ok);row.appendChild(cn);box.appendChild(h);box.appendChild(i);box.appendChild(m);box.appendChild(row);ov.appendChild(box);document.body.appendChild(ov);i.focus();}
 function fidSupported(){try{return !!(window.PublicKeyCredential&&navigator.credentials&&navigator.credentials.create&&navigator.credentials.get&&location.hostname);}catch(e){return false;}}
 function fidGet(){try{return localStorage.getItem("be-fid")||"";}catch(e){return "";}}
@@ -939,7 +934,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-22d",busy=false;
+(function(){var APP_BUILD="2026-11-22e",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
