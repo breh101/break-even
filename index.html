@@ -379,7 +379,7 @@ function openFormSheet(key,formId,title){if(FSHEET[key])return;var f=$(formId);i
  var box=document.createElement("div");box.style.cssText="background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;max-width:360px;width:100%;max-height:85vh;overflow:auto";
  var hd=document.createElement("div");hd.style.cssText="font-weight:800;font-size:16px;margin-bottom:8px;text-align:center";hd.textContent=title;var homeP=f.parentNode,homeN=f.nextSibling;box.appendChild(hd);box.appendChild(f);ov.appendChild(box);
  FSHEET[key]={ov:ov,home:homeP,next:homeN,id:formId};document.body.appendChild(ov);
- var rs={entries:function(){if(EID!==null)endEdit();},bills:function(){bformReset();},budgets:function(){vbReset();}};var cx=document.createElement("button");cx.textContent="Cancel";cx.style.cssText="width:100%;margin-top:10px;background:#c62828;color:#fff;border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer";cx.onclick=function(){if(rs[key])rs[key]();closeFormSheet(key);};box.appendChild(cx);Array.prototype.forEach.call(f.querySelectorAll("button"),function(b){if(/^cancel/i.test(b.textContent.trim()))b.style.display="none";});}
+ var rs={entries:function(){if(EID!==null)endEdit();},bills:function(){bformReset();},budgets:function(){vbReset();}};var cx=document.createElement("button");cx.textContent="Cancel";cx.style.cssText="width:100%;margin-top:10px;background:#c62828;color:#fff;border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer";cx.onclick=function(){if(rs[key])rs[key]();Array.prototype.forEach.call(f.querySelectorAll("input"),function(i){if(i.type==="text"||i.type==="number"||i.type==="password"||i.type==="email")i.value="";});closeFormSheet(key);};box.appendChild(cx);Array.prototype.forEach.call(f.querySelectorAll("button"),function(b){if(/^cancel/i.test(b.textContent.trim()))b.style.display="none";});}
 function closeFormSheet(key){var s=FSHEET[key];if(!s)return;var f=$(s.id);if(f&&s.home)s.home.insertBefore(f,s.next);if(f&&(key==="acct"||key==="entries"||key==="bills"||key==="budgets"||key==="sections"||key==="categories"))f.style.display="none";if(s.ov.parentNode)s.ov.parentNode.removeChild(s.ov);delete FSHEET[key];}
 function restoreBillForm(){closeFormSheet("bills");}
 function openBillSheet(title){openFormSheet("bills","bForm",title);}
@@ -795,7 +795,7 @@ function buildCats(){var el=$("catList");el.innerHTML="";
 $("acat").onclick=function(){var v=$("ncat").value.trim(),sc=$("ncsec").value,isNew=v&&!S.cats.some(function(z){return z.toLowerCase()===v.toLowerCase();});addCat($("ncat"),S.cats);if(isNew&&sc&&sc!=="Ungrouped"){S.cmap[v]=sc;save();afterCats();}};
 function togWrap(id,btn,label){var w=$(id),o=w.style.display==="none";w.style.display=o?"":"none";btn.textContent=o?"Cancel":label;}
 $("osec").onclick=function(){openFormSheet("sections","secWrap","Add section");};
-$("ocat").onclick=function(){openFormSheet("categories","catWrap","Add category");};
+$("ocat").onclick=function(){var sel=$("ncsec");sel.innerHTML="";["Ungrouped"].concat(S.secs||[]).forEach(function(x){var o=document.createElement("option");o.value=x;o.textContent=x;sel.appendChild(o);});sel.value="Ungrouped";openFormSheet("categories","catWrap","Add category");};
 $("asec").onclick=function(){var v=$("nsec").value.trim();if(!v||v.toLowerCase()==="ungrouped"){$("nsec").focus();return;}if(!S.secs.some(function(z){return z.toLowerCase()===v.toLowerCase();}))S.secs.push(v);$("nsec").value="";save();afterCats();closeFormSheet("sections");};
 $("bp").onclick=function(){$("mp").onclick();};
 $("bnx").onclick=function(){$("mn").onclick();};
@@ -934,7 +934,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-22e",busy=false;
+(function(){var APP_BUILD="2026-11-22f",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
