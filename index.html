@@ -306,7 +306,7 @@ var CHK=1,FUND=2,CARD=3,tx=[],n=5000;
 function T(day,type,amt,note,cat,acct,extra){if(day>dd)return;var o={id:++n,date:D(day),type:type,amt:amt,note:note,cat:cat||"",ff:false,acct:acct};if(extra){for(var k in extra)o[k]=extra[k];}tx.push(o);}
 T(1,"income",3000,"Paycheck","Paycheck",CHK);
 T(15,"income",3000,"Paycheck","Paycheck",CHK);
-T(3,"expense",84.12,"Trader Joe's","Groceries",CARD);
+T(3,"expense",84.12,"Trader Joe’s","Groceries",CARD);
 T(6,"expense",41.50,"Shell","Gas",CARD);
 T(9,"expense",32.80,"Chipotle","Eating Out",CARD);
 T(12,"expense",56.00,"Target","Shopping",CARD);
@@ -1003,7 +1003,7 @@ function nwRemRender(){var box=$("nwRemBox");if(!box)return;box.innerHTML="";var
  var ts=document.createElement("select");ts.style.flex="1";for(var mins=300;mins<=1320;mins+=30){var v=("0"+Math.floor(mins/60)).slice(-2)+":"+("0"+(mins%60)).slice(-2);var o2=document.createElement("option");o2.value=v;o2.textContent=fmtHM(v);ts.appendChild(o2);}ts.value=r.time||"09:00";ts.onchange=function(){nwRemSet(undefined,ts.value);};
  row.appendChild(fs);row.appendChild(ts);box.appendChild(h);box.appendChild(row);
  var n=document.createElement("div");n.id="nwRemNote";n.style.cssText="color:var(--mut);font-size:13px;margin-top:6px;line-height:1.5";
- var t;if(!r.freq||r.freq==="off")t="No update reminder set.";else if(!("Notification" in window))t="Notifications aren’t supported in this browser.";else if(Notification.permission!=="granted")t="Turn on notifications under Account → Allow notifications so this can show.";else t="We'll remind you to update your balances "+({weekly:"every week",biweekly:"every 2 weeks",monthly:"every month"}[r.freq])+" at "+fmtHM(r.time||"09:00")+".";
+ var t;if(!r.freq||r.freq==="off")t="No update reminder set.";else if(!("Notification" in window))t="Notifications aren’t supported in this browser.";else if(Notification.permission!=="granted")t="Turn on notifications under Account → Allow notifications so this can show.";else t="We’ll remind you to update your balances "+({weekly:"every week",biweekly:"every 2 weeks",monthly:"every month"}[r.freq])+" at "+fmtHM(r.time||"09:00")+".";
  n.textContent=t;box.appendChild(n);}
 function nwRemCheck(){if(DEMO||!S.nwRemind)return;var r=S.nwRemind;
  var d=new Date(),today=todayStr(),hm=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);if(hm<(r.time||"09:00"))return;if(!nwDue(r,today))return;
@@ -1103,7 +1103,7 @@ function lkRender(){var el=document.getElementById("lkSet");if(!el)return;el.inn
     if(!/^\d{4}$/.test(v)){done("PIN must be 4 digits.");return;}
     done(null);
     pinModal("Confirm PIN","Type the PIN again","Turn on lock",function(c,done2){
-      if(c!==v){done2("The PINs don't match.");return;}
+      if(c!==v){done2("The PINs don’t match.");return;}
       pinStore(pinHash(v));done2(null);lkRender();});});};}
  else{b.textContent="Turn off lock";b.onclick=function(){pinModal("Turn off lock","Current PIN","Turn off",function(v,done){
     if(pinHash(v)!==pinGet()){done("Wrong PIN.");return;}
@@ -1120,7 +1120,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-25h",busy=false;
+(function(){var APP_BUILD="2026-11-25i",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
