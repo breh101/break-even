@@ -86,6 +86,7 @@ h2{display:block;text-align:center;justify-content:center}
 </head>
 <body>
 <main>
+<div id="demoBanner" style="display:none;background:var(--gold);color:#000;text-align:center;padding:6px 8px;font-size:13px;font-weight:600">Sample data · personal information hidden</div>
 <div class="top"><div class="tbrand"><h1 id="ptitle">Break Even</h1><img src="apple-touch-icon.png" alt="" width="28" height="28" style="border-radius:7px;flex:none"></div></div>
 <div class="menu" id="menu" style="display:none"></div>
 
@@ -189,6 +190,7 @@ h2{display:block;text-align:center;justify-content:center}
 </div>
 <div class="card">
 <h2>Backup</h2>
+<div style="margin-bottom:10px"><button class="p" id="demoBtn" style="width:auto">Sign out</button><small id="demoNote" style="display:block;color:var(--mut);margin-top:6px;line-height:1.5"></small></div>
 <div id="cloud" style="color:var(--mut);font-size:14px;margin-bottom:6px">Cloud save: connecting…</div>
 <button class="p" id="csyncb" style="margin-top:0;margin-bottom:12px">Sync now</button>
 <div style="color:var(--mut);font-size:14px">Your data is saved on this device and in your private cloud save. A manual backup is still a good safety net: copy one now and then, and paste it below to restore.</div>
@@ -278,10 +280,41 @@ h2{display:block;text-align:center;justify-content:center}
 window.onerror=function(m,s,l){try{document.getElementById("cloud").textContent="App error (line "+l+"): "+m;}catch(e){}};
 (function(){
 setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("cloud").textContent="Cloud error: "+(e&&e.message);}catch(x){}}},0);
-var KEY="expense-tracker-v1";
+var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
+var KEY=DEMO?"expense-tracker-demo-v1":"expense-tracker-v1";
+function sampleData(){
+var now=new Date(),dd=now.getDate(),ym=now.getFullYear()+"-"+("0"+(now.getMonth()+1)).slice(-2);
+function D(n){return ym+"-"+("0"+n).slice(-2);}
+function ago(k){var x=new Date(now.getFullYear(),now.getMonth(),now.getDate()-k);return x.getFullYear()+"-"+("0"+(x.getMonth()+1)).slice(-2)+"-"+("0"+x.getDate()).slice(-2);}
+var CHK=1,FUND=2,CARD=3,tx=[],n=5000;
+function T(day,type,amt,note,cat,acct,extra){if(day>dd)return;var o={id:++n,date:D(day),type:type,amt:amt,note:note,cat:cat||"",ff:false,acct:acct};if(extra){for(var k in extra)o[k]=extra[k];}tx.push(o);}
+T(1,"income",2100,"Paycheck","Paycheck",CHK);
+T(15,"income",2100,"Paycheck","Paycheck",CHK);
+T(3,"expense",84.12,"Trader Joe's","Groceries",CARD);
+T(6,"expense",41.50,"Shell","Gas",CARD);
+T(9,"expense",32.80,"Chipotle","Eating Out",CARD);
+T(12,"expense",56.00,"Target","Shopping",CARD);
+T(19,"expense",18.75,"Coffee shop","Eating Out",CARD);
+T(4,"expense",61.20,"Kroger","Groceries",CHK);
+T(8,"expense",20,"Transit pass","Public Transit",CHK);
+T(14,"expense",35,"Birthday gift","Gifts",CHK);
+T(10,"move",150,"Card payment – Credit card","",CHK,{to:CARD});
+var bills=[{id:101,name:"Rent",amt:1450,day:1,cat:"Rent/Conservice"},{id:102,name:"Electricity",amt:95,day:5,cat:"Electricity"},{id:103,name:"Internet",amt:70,day:7,cat:"Internet"},{id:104,name:"Phone",amt:40,day:12,cat:"Phone"},{id:105,name:"Car note",amt:320,day:20,cat:"Car Note"},{id:106,name:"Renters insurance",amt:140,day:28,cat:"Insurance"}];
+bills.forEach(function(b){b.freq="monthly";b.acct=CHK;if(b.id<=104&&b.day<=dd){var due=D(b.day);tx.push({id:++n,date:due,type:"expense",amt:b.amt,note:b.name,cat:b.cat,ff:false,acct:CHK,billId:b.id,billMonth:ym,billDue:due});}});
+var vb=[["Groceries",400],["Eating Out",150],["Gas",120],["Shopping",100],["Gifts",60],["Public Transit",40]].map(function(x,i){return {id:201+i,name:x[0],cat:x[0],amt:x[1]};});
+var plans={};plans[ym]={items:{"Groceries":"400","Eating Out":"150","Gas":"120","Shopping":"100","Gifts":"60"},inc:"4200"};
+var nw={items:[{id:301,name:"401(k)",type:"asset",snaps:[{d:ago(30),amt:38000},{d:ago(0),amt:41250}]},{id:302,name:"Car loan",type:"debt",snaps:[{d:ago(0),amt:9200}]}]};
+return {accts:[{id:CHK,name:"Checking",start:"2400",bank:"",kind:"checking"},{id:FUND,name:"Fund",start:"800",bank:"",kind:"fund"},{id:CARD,name:"Credit card",start:"0",bank:"",kind:"card"}],
+ tx:tx,bills:bills,vbudgets:vb,vbOv:{},billOv:{},
+ secs:["Housing","Food & Drink","Lifestyle"],
+ cmap:{"Rent/Conservice":"Housing","Electricity":"Housing","Internet":"Housing","Phone":"Housing","Groceries":"Food & Drink","Eating Out":"Food & Drink","Gas":"Lifestyle","Public Transit":"Lifestyle","Shopping":"Lifestyle","Gifts":"Lifestyle"},
+ plans:plans,fs:"800",ft:"1600",fpp:"300",nw:nw,seeded:true};
+}
+
 var booting=true;
 var S={accts:[],fs:"",ft:"1600",tx:[]};
 try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&Array.isArray(p.tx))S=p;}}catch(e){}
+try{if(DEMO&&!localStorage.getItem(KEY))S=sampleData();}catch(e){}
 function save(){if(!booting)S.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}if(!booting)queuePush();}
 var $=function(id){return document.getElementById(id)};
 function $$(n){return (n<0?"-":"")+"$"+Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}
@@ -852,13 +885,14 @@ $("bp").onclick=function(){$("mp").onclick();};
 $("bnx").onclick=function(){$("mn").onclick();};
 buildCats();var sp0="home";try{sp0=sessionStorage.getItem("be-page")||"home";}catch(e){}if(!PAGES.some(function(g){return g[0]===sp0;}))sp0="home";buildTabs();showPage(sp0);
 booting=false;
+try{if(DEMO)$("demoBanner").style.display="";$("demoBtn").textContent=DEMO?"Back to my data":"Sign out";$("demoNote").textContent=DEMO?"You are viewing sample data. Your own data is still saved on this device.":"Shows a sample version of the app with no personal information. Your data stays on this device.";$("demoBtn").onclick=function(){try{if(DEMO){localStorage.setItem("be-demo","0");}else{localStorage.removeItem("expense-tracker-demo-v1");localStorage.setItem("be-demo","1");}}catch(e){}location.reload();};}catch(e){}
 var CL={ref:null,busy:false,dirty:false,t:null};
 function cmsg(s){$("cloud").textContent=s;var lw=$("loadWarn");if(lw)lw.style.display=/isn.t available|unavailable/i.test(s)?"":"none";var sp=$("syncPill");if(sp)sp.style.display=/checking|saving/i.test(s)?"":"none";}
-function queuePush(){if(!CL.ref)return;clearTimeout(CL.t);CL.t=setTimeout(cpush,1500);}
-function cpush(){if(!CL.ref||!CL.ready)return;if(S.tx.length===0&&(CL.cloudTx||0)>0){cmsg("Cloud save paused: this copy has no entries, so it won’t overwrite your cloud data.");return;}if(CL.busy){CL.dirty=true;return;}CL.busy=true;if(!S.updated)S.updated=Date.now();cmsg("Cloud save: saving…");
+function queuePush(){if(!CL.ref||DEMO)return;clearTimeout(CL.t);CL.t=setTimeout(cpush,1500);}
+function cpush(){if(!CL.ref||!CL.ready||DEMO)return;if(S.tx.length===0&&(CL.cloudTx||0)>0){cmsg("Cloud save paused: this copy has no entries, so it won’t overwrite your cloud data.");return;}if(CL.busy){CL.dirty=true;return;}CL.busy=true;if(!S.updated)S.updated=Date.now();cmsg("Cloud save: saving…");
 CL.ref.set({json:JSON.stringify(S),updatedAt:S.updated}).then(function(){cmsg("Cloud save: saved at "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})+".");}).catch(function(e){cmsg("Cloud save failed ("+((e&&e.code)||"error")+"). Your data is still saved on this device.");}).then(function(){CL.busy=false;if(CL.dirty){CL.dirty=false;cpush();}});}
 function adopt(p){endEdit();booting=true;S=p;migratePf();migrateFf();migrateMvFund();syncCats();S.fs=S.fs||"";if(S.ft==null)S.ft="1600";S.seeded=true;if(!S.plans)S.plans={};fixOrder();save();applyOrder();$("fs").value=S.fs;$("ft").value=S.ft;syncCats();buildPlan();loadPlanInputs();buildCats();fillCat($("type").value);buildAcc();render();booting=false;}
-function csync(){if(!CL.ref)return;cmsg("Cloud save: checking…");
+function csync(){if(!CL.ref||DEMO)return;cmsg("Cloud save: checking…");
 CL.ref.get().then(function(s){CL.ready=true;var d=s.exists?s.data():null;
 if(d&&d.json){var p=null;try{p=JSON.parse(d.json);}catch(e){}
 if(p&&Array.isArray(p.tx)&&Array.isArray(p.accts)&&p.accts.length){var cu=d.updatedAt||0,lu=S.updated||0;
@@ -866,7 +900,7 @@ CL.cloudTx=p.tx.length;if(cu>lu||(S.tx.length===0&&p.tx.length>0)){adopt(p);cmsg
 if(cu===lu){cmsg("Cloud save: up to date.");return;}}}
 cpush();
 }).catch(function(e){cmsg("Cloud save unavailable ("+((e&&e.code)||"error")+"). Your data stays on this device.");});}
-function cloudInit(){try{
+function cloudInit(){if(DEMO){cmsg("Sample mode: cloud sync is off.");return;}try{
 if(!window.claude||!window.claude.use){sbInit();return;}
 Promise.race([Promise.all([window.claude.use("db"),window.claude.use("user")]),new Promise(function(res,rej){setTimeout(function(){rej(new Error("timeout"));},10000);})]).then(function(r){var db=r[0],u=r[1];
 if(!db||!u){cmsg("Cloud save isn’t available in this view. Your data stays on this device.");return;}
@@ -880,7 +914,7 @@ function sbClient(){if(!SBC)SBC=window.supabase.createClient(SB_URL,SB_KEY,{auth
 function sbRef(uid){var c=sbClient();return {
  get:function(){return c.from("budget_data").select("data,updated_at").eq("user_id",uid).maybeSingle().then(function(r){if(r.error)throw r.error;var row=r.data;return {exists:!!row,data:function(){var d=row&&row.data;return d?{json:d.json||null,updatedAt:d.updatedAt||0}:null;}};});},
  set:function(v){return c.from("budget_data").upsert({user_id:uid,data:{json:v.json,updatedAt:v.updatedAt},updated_at:new Date().toISOString()}).then(function(r){if(r.error)throw r.error;});}};}
-function sbInit(){sbLoad(function(){try{sbClient().auth.getSession().then(function(r){var ses=r.data&&r.data.session;if(!ses){cmsg("Sign in to sync your data (Backup → Cloud sign-in).");return;}CL.ref=sbRef(ses.user.id);csync();}).catch(function(){cmsg("Cloud save unavailable. Your data stays on this device.");});}catch(e){cmsg("Cloud save unavailable. Your data stays on this device.");}});}
+function sbInit(){if(DEMO)return;sbLoad(function(){try{sbClient().auth.getSession().then(function(r){var ses=r.data&&r.data.session;if(!ses){cmsg("Sign in to sync your data (Backup → Cloud sign-in).");return;}CL.ref=sbRef(ses.user.id);csync();}).catch(function(){cmsg("Cloud save unavailable. Your data stays on this device.");});}catch(e){cmsg("Cloud save unavailable. Your data stays on this device.");}});}
 function sbModal(){var ov=document.createElement("div");ov.id="sbModalOv";ov.style.cssText="position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:210;padding:16px;box-sizing:border-box";
  var box=document.createElement("div");box.style.cssText="background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;max-width:320px;width:100%;text-align:center";
  var h=document.createElement("div");h.style.cssText="font-weight:800;font-size:16px;margin-bottom:10px";h.textContent="Sign in to sync";
@@ -985,7 +1019,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-25a",busy=false;
+(function(){var APP_BUILD="2026-11-25b",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
