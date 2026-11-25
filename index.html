@@ -950,7 +950,7 @@ function sbModal(mode){mode=mode||"in";
     useAccount(user.id,email);
    }).catch(function(){m.style.color="#b00";m.textContent="Connection problem. Try again.";});});};
  row.appendChild(ok);row.appendChild(sw);row.appendChild(cn);box.appendChild(h);box.appendChild(em);box.appendChild(pw);box.appendChild(m);box.appendChild(row);ov.appendChild(box);document.body.appendChild(ov);paint();em.focus();}
-function acctSignOut(){function done(){try{localStorage.removeItem("be-uid");localStorage.removeItem("be-email");localStorage.setItem("be-demo","1");}catch(e){}location.reload();}
+function acctSignOut(){function done(){try{localStorage.removeItem("be-uid");localStorage.removeItem("be-email");localStorage.removeItem("expense-tracker-demo-v1");localStorage.setItem("be-demo","1");}catch(e){}location.reload();}
  try{sbLoad(function(){sbClient().auth.signOut().then(done).catch(done);});}catch(e){done();}}
 function acctRender(){var box=$("acctBox");if(!box)return;box.innerHTML="";
  var msg=document.createElement("div");msg.style.cssText="color:var(--mut);font-size:13px;line-height:1.5;margin-bottom:8px";
@@ -1068,7 +1068,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-25c",busy=false;
+(function(){var APP_BUILD="2026-11-25d",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
