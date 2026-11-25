@@ -291,6 +291,7 @@ setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("clo
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
 var UPD_SEED_AFTER="2026-11-25";
 var UPDATES=[
+{d:"2026-11-25",t:"Notifications are removed automatically after 30 days."},
 {d:"2026-11-25",t:"The menu icon is replaced by a See all app updates button on the Notifications page."},
 {d:"2026-11-25",t:"You can delete your account from the More tab. This removes your budget data from this device and from the cloud."},
 {d:"2026-11-25",t:"The Backup tab is now called More, and Sign out is at the bottom of that page."},
@@ -1018,7 +1019,7 @@ function nwRemCheck(){if(DEMO||!S.nwRemind)return;var r=S.nwRemind;
 
 
 function fmtDate(s){var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],p=s.split("-");return m[+p[1]-1]+" "+(+p[2])+", "+p[0];}
-function notesGet(){try{return JSON.parse(localStorage.getItem("be-notes")||"[]");}catch(e){return [];}}
+function notesGet(){var a=[];try{a=JSON.parse(localStorage.getItem("be-notes")||"[]");}catch(e){}var cs=new Date(Date.now()-30*86400000).toLocaleDateString("en-CA");var keep=a.filter(function(n){return n.d>=cs;});if(keep.length!==a.length)notesSet(keep);return keep;}
 function notesSet(a){try{localStorage.setItem("be-notes",JSON.stringify(a.slice(0,100)));}catch(e){}}
 function bellRender(){var dot=$("bellDot");if(!dot)return;dot.style.display=notesGet().some(function(n){return !n.read;})?"":"none";}
 function addNote(kind,text){var a=notesGet();a.unshift({id:String(Date.now()+Math.random()),d:todayStr(),text:text,kind:kind,read:false});notesSet(a);bellRender();}
@@ -1126,7 +1127,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-25l",busy=false;
+(function(){var APP_BUILD="2026-11-25m",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
