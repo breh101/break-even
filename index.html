@@ -291,6 +291,7 @@ setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("clo
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
 var UPD_SEED_AFTER="2026-11-25";
 var UPDATES=[
+{d:"2026-11-25",t:"A reminder set for a time that has already passed today starts tomorrow."},
 {d:"2026-11-25",t:"Notifications are removed automatically after 30 days."},
 {d:"2026-11-25",t:"The menu icon is replaced by a See all app updates button on the Notifications page."},
 {d:"2026-11-25",t:"You can delete your account from the More tab. This removes your budget data from this device and from the cloud."},
@@ -991,7 +992,7 @@ function remRender(){var box=$("remBox");if(!box)return;box.innerHTML="";
  var off=document.createElement("option");off.value="";off.textContent="Off";sel.appendChild(off);
  for(var mins=300;mins<=1320;mins+=30){var v=("0"+Math.floor(mins/60)).slice(-2)+":"+("0"+(mins%60)).slice(-2);var o=document.createElement("option");o.value=v;o.textContent=fmtHM(v);sel.appendChild(o);}
  sel.value=S.remind||"";
- sel.onchange=function(){S.remind=sel.value;save();remNote();};
+ sel.onchange=function(){S.remind=sel.value;S.remindFrom=sel.value?startFor(sel.value):"";save();remNote();};
  var note=document.createElement("div");note.id="remNote";note.style.cssText="color:var(--mut);font-size:13px;margin-top:6px;line-height:1.5";
  var al=document.createElement("button");al.className="p";al.textContent="Allow notifications";al.style.marginTop="8px";
  al.onclick=function(){if(!("Notification" in window)){remNote("Notifications aren’t supported in this browser. On iPhone, add Break Even to your Home Screen first.");return;}Notification.requestPermission().then(function(){remNote();});};
@@ -1002,7 +1003,8 @@ function remNote(extra){var n=$("remNote");if(!n)return;var t=extra||"";
 function nwDue(r,day){if(!r||!r.anchor||!r.freq||r.freq==="off")return false;var a=new Date(r.anchor+"T12:00:00"),d=new Date(day+"T12:00:00");var days=Math.round((d-a)/86400000);if(days<0)return false;
  if(r.freq==="weekly")return days%7===0;if(r.freq==="biweekly")return days%14===0;
  if(r.freq==="monthly"){var last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();return d.getDate()===Math.min(a.getDate(),last);}return false;}
-function nwRemSet(freq,time){var r=S.nwRemind||{freq:"off",time:"09:00",anchor:""};if(freq!==undefined){if(freq!==r.freq)r.anchor=freq==="off"?"":todayStr();r.freq=freq;}if(time!==undefined)r.time=time;S.nwRemind=r;save();nwRemRender();}
+function startFor(time){var n=new Date(),hm=("0"+n.getHours()).slice(-2)+":"+("0"+n.getMinutes()).slice(-2);return hm>=time?new Date(Date.now()+86400000).toLocaleDateString("en-CA"):todayStr();}
+function nwRemSet(freq,time){var r=S.nwRemind||{freq:"off",time:"09:00",anchor:""};if(freq!==undefined){if(freq!==r.freq)r.anchor=freq==="off"?"":startFor(time!==undefined?time:(r.time||"09:00"));r.freq=freq;}if(time!==undefined){r.time=time;if(freq===undefined&&r.freq&&r.freq!=="off"&&r.anchor===todayStr()&&startFor(time)!==todayStr())r.anchor=startFor(time);}S.nwRemind=r;save();nwRemRender();}
 function nwRemRender(){var box=$("nwRemBox");if(!box)return;box.innerHTML="";var r=S.nwRemind||{freq:"off",time:"09:00",anchor:""};
  var h=document.createElement("div");h.style.cssText="font-weight:700;margin-bottom:6px";h.textContent="Update reminder";
  var row=document.createElement("div");row.style.cssText="display:flex;gap:8px";
@@ -1035,7 +1037,7 @@ function notesRender(){var box=$("noteList");if(!box)return;box.innerHTML="";var
   var d=document.createElement("div");d.style.cssText="color:var(--mut);font-size:13px";d.textContent=fmtDate(n.d)+(n.kind==="update"?" · Update":n.kind==="reminder"?" · Reminder":"");var t=document.createElement("div");t.textContent=n.text;r.appendChild(d);r.appendChild(t);box.appendChild(r);});
  notesSet(a.map(function(n){n.read=true;return n;}));bellRender();}
 
-function remCheck(){if(DEMO||!S.remind)return;
+function remCheck(){if(DEMO||!S.remind)return;if(S.remindFrom&&todayStr()<S.remindFrom)return;
  var d=new Date(),hm=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);if(hm<S.remind)return;
  var k="be-rem-"+todayStr();try{if(localStorage.getItem(k))return;localStorage.setItem(k,"1");}catch(e){}
  addNote("reminder","Log any new entries and check your account balances.");if("Notification" in window&&Notification.permission==="granted"){try{new Notification("Break Even",{body:"Log any new entries and check your account balances.",tag:"be-daily"});}catch(e){}}}
@@ -1127,7 +1129,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-25m",busy=false;
+(function(){var APP_BUILD="2026-11-25n",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
