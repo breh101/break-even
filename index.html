@@ -260,6 +260,7 @@ h2{display:block;text-align:center;justify-content:center}
 <div class="card">
 <h2>Net worth</h2>
 <div style="text-align:center"><small style="color:var(--mut)">Total net worth</small><div id="nwTot" class="big" style="font-size:36px;margin:4px 0">$0.00</div><small id="nwNote" style="color:var(--mut);display:block;line-height:1.5"></small></div>
+<div id="nwRemBox" style="margin:12px 0"></div>
 <div id="nwChart" style="margin:12px 0"></div>
 <div id="nwList"></div>
 <div style="border-top:1px solid var(--bd);margin-top:10px;padding-top:10px">
@@ -803,7 +804,7 @@ items.forEach(function(it){var cur=nwLatest(it,t),row=document.createElement("di
 $("nwAdd").onclick=function(){var nm=$("nwN").value.trim(),a=parseFloat($("nwA").value),msg=$("nwMsg");
  if(!nm){msg.textContent="Enter a name for this item.";return;}if(isNaN(a)){msg.textContent="Enter the current balance.";return;}
  nwItems().push({id:Date.now(),name:nm,type:$("nwT").value,snaps:[{d:todayStr(),amt:a}]});save();$("nwN").value="";$("nwA").value="";msg.textContent="Added "+nm+".";nwRender();};
-function showPage(p){try{SCR[cur]=window.scrollY||0;}catch(e){}cur=p;if(p==="nw")nwRender();try{$("pageBills").style.display=p==="bills"?"":"none";if(p==="bills")renderBills();}catch(e){}try{[].forEach.call($("tabs").children,function(b){b.className=b.getAttribute("data-p")===p?"on":"";});}catch(e){}try{sessionStorage.setItem("be-page",p);}catch(e){}cards.forEach(function(c){c.style.display=cardPage(c)===p?"":"none";});PAGES.forEach(function(g){if(g[0]===p)$("ptitle").textContent="Break Even";$("ptitle").style.visibility="visible";try{$("ham").style.visibility=p==="home"?"visible":"hidden";}catch(e){}});$("menu").style.display="none";try{window.scrollTo(0,SCR[p]||0);}catch(e){}}
+function showPage(p){try{SCR[cur]=window.scrollY||0;}catch(e){}cur=p;if(p==="nw"){nwRender();nwRemRender();}try{$("pageBills").style.display=p==="bills"?"":"none";if(p==="bills")renderBills();}catch(e){}try{[].forEach.call($("tabs").children,function(b){b.className=b.getAttribute("data-p")===p?"on":"";});}catch(e){}try{sessionStorage.setItem("be-page",p);}catch(e){}cards.forEach(function(c){c.style.display=cardPage(c)===p?"":"none";});PAGES.forEach(function(g){if(g[0]===p)$("ptitle").textContent="Break Even";$("ptitle").style.visibility="visible";try{$("ham").style.visibility=p==="home"?"visible":"hidden";}catch(e){}});$("menu").style.display="none";try{window.scrollTo(0,SCR[p]||0);}catch(e){}}
 function setupHams(){var first={};cards.forEach(function(c){var p=cardPage(c);if(p&&!first[p])first[p]=c;});
  var pb=$("pageBills");var bc=pb?[].filter.call(pb.children,function(n){return n.classList&&n.classList.contains("card");})[0]:null;if(bc)first.bills=bc;
  Object.keys(first).forEach(function(p){var c=first[p];var h2=c.querySelector("h2");if(!h2||h2.parentNode!==c)return;var w=document.createElement("div");w.className="hwrap";c.insertBefore(w,h2);w.appendChild(h2);var b=document.createElement("button");b.className="ham";b.setAttribute("aria-label","Menu");b.textContent="\u2630";w.appendChild(b);});
@@ -976,11 +977,29 @@ function remRender(){var box=$("remBox");if(!box)return;box.innerHTML="";
 function remNote(extra){var n=$("remNote");if(!n)return;var t=extra||"";
  if(!t){if(!S.remind)t="No reminder set.";else if(!("Notification" in window))t="Notifications aren’t supported in this browser.";else if(Notification.permission!=="granted")t="Tap Allow notifications so the reminder can show.";else t="Reminder set for "+fmtHM(S.remind)+". It shows when the app is open or on your Home Screen.";}
  n.textContent=t;}
+function nwDue(r,day){if(!r||!r.anchor||!r.freq||r.freq==="off")return false;var a=new Date(r.anchor+"T12:00:00"),d=new Date(day+"T12:00:00");var days=Math.round((d-a)/86400000);if(days<0)return false;
+ if(r.freq==="weekly")return days%7===0;if(r.freq==="biweekly")return days%14===0;
+ if(r.freq==="monthly"){var last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();return d.getDate()===Math.min(a.getDate(),last);}return false;}
+function nwRemSet(freq,time){var r=S.nwRemind||{freq:"off",time:"09:00",anchor:""};if(freq!==undefined){if(freq!==r.freq)r.anchor=freq==="off"?"":todayStr();r.freq=freq;}if(time!==undefined)r.time=time;S.nwRemind=r;save();nwRemRender();}
+function nwRemRender(){var box=$("nwRemBox");if(!box)return;box.innerHTML="";var r=S.nwRemind||{freq:"off",time:"09:00",anchor:""};
+ var h=document.createElement("div");h.style.cssText="font-weight:700;margin-bottom:6px";h.textContent="Update reminder";
+ var row=document.createElement("div");row.style.cssText="display:flex;gap:8px";
+ var fs=document.createElement("select");fs.style.flex="1";[["off","Off"],["weekly","Weekly"],["biweekly","Every 2 weeks"],["monthly","Monthly"]].forEach(function(o){var x=document.createElement("option");x.value=o[0];x.textContent=o[1];fs.appendChild(x);});fs.value=r.freq||"off";fs.onchange=function(){nwRemSet(fs.value,undefined);};
+ var ts=document.createElement("select");ts.style.flex="1";for(var mins=300;mins<=1320;mins+=30){var v=("0"+Math.floor(mins/60)).slice(-2)+":"+("0"+(mins%60)).slice(-2);var o2=document.createElement("option");o2.value=v;o2.textContent=fmtHM(v);ts.appendChild(o2);}ts.value=r.time||"09:00";ts.onchange=function(){nwRemSet(undefined,ts.value);};
+ row.appendChild(fs);row.appendChild(ts);box.appendChild(h);box.appendChild(row);
+ var n=document.createElement("div");n.id="nwRemNote";n.style.cssText="color:var(--mut);font-size:13px;margin-top:6px;line-height:1.5";
+ var t;if(!r.freq||r.freq==="off")t="No update reminder set.";else if(!("Notification" in window))t="Notifications aren’t supported in this browser.";else if(Notification.permission!=="granted")t="Turn on notifications under Account → Allow notifications so this can show.";else t="We'll remind you to update your balances "+({weekly:"every week",biweekly:"every 2 weeks",monthly:"every month"}[r.freq])+" at "+fmtHM(r.time||"09:00")+".";
+ n.textContent=t;box.appendChild(n);}
+function nwRemCheck(){if(DEMO||!S.nwRemind||!("Notification" in window)||Notification.permission!=="granted")return;var r=S.nwRemind;
+ var d=new Date(),today=todayStr(),hm=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);if(hm<(r.time||"09:00"))return;if(!nwDue(r,today))return;
+ var k="be-nwrem-"+today;try{if(localStorage.getItem(k))return;localStorage.setItem(k,"1");}catch(e){}
+ try{new Notification("Break Even",{body:"Time to update your investment and retirement balances on the Net worth tab.",tag:"be-nw"});}catch(e){}}
+
 function remCheck(){if(DEMO||!S.remind||!("Notification" in window)||Notification.permission!=="granted")return;
  var d=new Date(),hm=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);if(hm<S.remind)return;
  var k="be-rem-"+todayStr();try{if(localStorage.getItem(k))return;localStorage.setItem(k,"1");}catch(e){}
  try{new Notification("Break Even",{body:"Log any new entries and check your account balances.",tag:"be-daily"});}catch(e){}}
-acctRender();setInterval(function(){try{remCheck();}catch(e){}},30000);
+acctRender();setInterval(function(){try{remCheck();}catch(e){}try{nwRemCheck();}catch(e){}},30000);
 
 })();
 
@@ -1068,7 +1087,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-25d",busy=false;
+(function(){var APP_BUILD="2026-11-25e",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
