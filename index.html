@@ -191,7 +191,6 @@ h2{display:block;text-align:center;justify-content:center}
 </div>
 <div class="card">
 <h2>Backup</h2>
-<div style="margin-bottom:10px"><button class="p" id="demoBtn" style="width:auto">Sign out</button><small id="demoNote" style="display:block;color:var(--mut);margin-top:6px;line-height:1.5"></small></div>
 <div id="cloud" style="color:var(--mut);font-size:14px;margin-bottom:6px">Cloud save: connecting…</div>
 <button class="p" id="csyncb" style="margin-top:0;margin-bottom:12px">Sync now</button>
 <div style="color:var(--mut);font-size:14px">Your data is saved on this device and in your private cloud save. A manual backup is still a good safety net: copy one now and then, and paste it below to restore.</div>
@@ -274,6 +273,7 @@ h2{display:block;text-align:center;justify-content:center}
 </div>
 <div class="card"><h2>Updates</h2><div id="updList"></div></div>
 <div class="card"><h2>Notifications</h2><div style="margin-bottom:8px"><button class="rm" id="noteClear" style="width:auto">Clear all</button></div><div id="noteList"></div></div>
+<div class="card"><h2>Sign out</h2><div style="margin-bottom:10px"><button class="p" id="demoBtn" style="width:auto">Sign out</button><small id="demoNote" style="display:block;color:var(--mut);margin-top:6px;line-height:1.5"></small></div></div>
 </main>
 <nav class="tabs" id="tabs"></nav>
 <div id="loadWarn" style="display:none;position:fixed;top:0;left:0;right:0;background:var(--neg);color:#fff;font-size:13px;padding:8px 12px;z-index:90;text-align:center">Your saved data isn’t loaded in this window. Open the app from its claude.ai link in your browser, not the home screen icon.</div>
@@ -770,13 +770,13 @@ applyOrder();
 migratePf();migrateFf();migrateMvFund();buildAcc();tog();render();
 (function(){var keep=function(fn){return function(){var y=window.scrollY||0;try{return fn.apply(this,arguments);}finally{try{window.scrollTo(0,y);}catch(e){}}};};
  render=keep(render);renderBills=keep(renderBills);buildAcc=keep(buildAcc);buildCats=keep(buildCats);renderVB=keep(renderVB);buildPlan=keep(buildPlan);})();
-var PAGES=[["home","Overview"],["bills","Bills"],["cats","Categories"],["nw","Net worth"],["backup","Backup & sync"],["updates","Updates"],["notes","Notifications"]];
-var CPMAP={"Updates":"updates","Notifications":"notes","Account":"backup","Net worth":"nw","Monthly Overview":"home","Accounts":"home","Entries":"home","Backup":"backup","App lock":"backup","Cloud sign-in":"backup","Categories":"cats","Monthly plan":"gone","Spending breakdown":"gone"};
+var PAGES=[["home","Overview"],["bills","Bills"],["cats","Categories"],["nw","Net worth"],["backup","More"],["updates","Updates"],["notes","Notifications"]];
+var CPMAP={"Sign out":"backup","Updates":"updates","Notifications":"notes","Account":"backup","Net worth":"nw","Monthly Overview":"home","Accounts":"home","Entries":"home","Backup":"backup","App lock":"backup","Cloud sign-in":"backup","Categories":"cats","Monthly plan":"gone","Spending breakdown":"gone"};
 function cardPage(c){var hh=c.querySelector("h2");var t="";if(hh){[].forEach.call(hh.childNodes,function(n){if(n.nodeType===3)t+=n.textContent;});t=t.trim();}return CPMAP[t]||"gone";}
 var cur="home";
 function buildMenu(){var mn=$("menu");mn.innerHTML="";PAGES.filter(function(g){return MENUP.indexOf(g[0])>-1;}).forEach(function(g){var b=document.createElement("button");b.className="mi"+(g[0]===cur?" on":"");b.textContent=g[1];b.onclick=function(){showPage(g[0]);};mn.appendChild(b);});}
-var TABI={nw:"\ud83d\udcb0",home:"\ud83c\udfe0",plan:"\ud83d\uddd3\ufe0f",spend:"\ud83d\udcca",cats:"\ud83c\udff7\ufe0f",backup:"\u2601\ufe0f",bills:"\ud83d\udcc5"};
-var TABN={nw:"Net worth",home:"Home",plan:"Plan",spend:"Spending",cats:"Categories",backup:"Backup",bills:"Bills"};
+var TABI={backup:"\u22ef",nw:"\ud83d\udcb0",home:"\ud83c\udfe0",plan:"\ud83d\uddd3\ufe0f",spend:"\ud83d\udcca",cats:"\ud83c\udff7\ufe0f",backup:"\u2601\ufe0f",bills:"\ud83d\udcc5"};
+var TABN={nw:"Net worth",home:"Home",plan:"Plan",spend:"Spending",cats:"Categories",backup:"More",bills:"Bills"};
 var TABP=["home","bills","cats","nw","backup"],MENUP=[];
 function buildTabs(){var t=$("tabs");t.innerHTML="";PAGES.filter(function(g){return TABP.indexOf(g[0])>-1;}).forEach(function(g){var b=document.createElement("button");b.setAttribute("data-p",g[0]);b.innerHTML='<span class="ic">'+TABI[g[0]]+'</span><span>'+TABN[g[0]]+'</span>';b.onclick=function(){showPage(g[0]);};t.appendChild(b);});}
 var SCR={};
@@ -1117,7 +1117,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-25f",busy=false;
+(function(){var APP_BUILD="2026-11-25g",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
