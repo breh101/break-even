@@ -89,7 +89,7 @@ h2{display:block;text-align:center;justify-content:center}
 <body>
 <main>
 <div id="demoBanner" style="display:none;background:var(--gold);color:#000;text-align:center;padding:6px 8px;font-size:13px;font-weight:600">Sample data · personal information hidden</div>
-<div class="top"><button class="ibtn" id="menuBtn" aria-label="Updates">☰</button><div class="tbrand"><h1 id="ptitle">Break Even</h1><img src="apple-touch-icon.png" alt="" width="28" height="28" style="border-radius:7px;flex:none"></div><button class="ibtn" id="bellBtn" aria-label="Notifications" style="position:relative">🔔<span id="bellDot" style="display:none;position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;background:#e53935"></span></button></div>
+<div class="top"><div class="tbrand"><h1 id="ptitle">Break Even</h1><img src="apple-touch-icon.png" alt="" width="28" height="28" style="border-radius:7px;flex:none"></div><button class="ibtn" id="bellBtn" aria-label="Notifications" style="position:relative">🔔<span id="bellDot" style="display:none;position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;background:#e53935"></span></button></div>
 <div class="menu" id="menu" style="display:none"></div>
 
 <div class="card">
@@ -276,7 +276,7 @@ h2{display:block;text-align:center;justify-content:center}
 </div>
 </div>
 <div class="card"><h2>Updates</h2><div id="updList"></div></div>
-<div class="card"><h2>Notifications</h2><div style="margin-bottom:8px"><button class="rm" id="noteClear" style="width:auto">Clear all</button></div><div id="noteList"></div></div>
+<div class="card"><h2>Notifications</h2><button class="p" id="seeUpd" style="width:100%;margin-bottom:8px">See all app updates</button><div style="margin-bottom:8px"><button class="rm" id="noteClear" style="width:auto">Clear all</button></div><div id="noteList"></div></div>
 <div class="card"><h2>Sign out</h2><div style="margin-bottom:10px"><button class="p" id="demoBtn" style="width:100%">Sign out</button><small id="demoNote" style="display:block;color:var(--mut);margin-top:6px;line-height:1.5"></small></div></div>
 </main>
 <nav class="tabs" id="tabs"></nav>
@@ -291,6 +291,7 @@ setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("clo
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
 var UPD_SEED_AFTER="2026-11-25";
 var UPDATES=[
+{d:"2026-11-25",t:"The menu icon is replaced by a See all app updates button on the Notifications page."},
 {d:"2026-11-25",t:"You can delete your account from the More tab. This removes your budget data from this device and from the cloud."},
 {d:"2026-11-25",t:"The Backup tab is now called More, and Sign out is at the bottom of that page."},
 {d:"2026-11-25",t:"Card payments are now categorized as Transfer."},
@@ -1037,7 +1038,7 @@ function remCheck(){if(DEMO||!S.remind)return;
  var d=new Date(),hm=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);if(hm<S.remind)return;
  var k="be-rem-"+todayStr();try{if(localStorage.getItem(k))return;localStorage.setItem(k,"1");}catch(e){}
  addNote("reminder","Log any new entries and check your account balances.");if("Notification" in window&&Notification.permission==="granted"){try{new Notification("Break Even",{body:"Log any new entries and check your account balances.",tag:"be-daily"});}catch(e){}}}
-acctRender();try{checkUpdates();bellRender();$("menuBtn").onclick=function(){showPage("updates");};$("bellBtn").onclick=function(){showPage("notes");};$("noteClear").onclick=function(){notesSet([]);notesRender();};}catch(e){}setInterval(function(){try{remCheck();}catch(e){}try{nwRemCheck();}catch(e){}},30000);
+acctRender();try{checkUpdates();bellRender();$("seeUpd").onclick=function(){showPage("updates");};$("bellBtn").onclick=function(){showPage("notes");};$("noteClear").onclick=function(){notesSet([]);notesRender();};}catch(e){}setInterval(function(){try{remCheck();}catch(e){}try{nwRemCheck();}catch(e){}},30000);
 
 })();
 
@@ -1125,7 +1126,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-25k",busy=false;
+(function(){var APP_BUILD="2026-11-25l",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
