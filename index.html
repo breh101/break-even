@@ -63,7 +63,8 @@ h2{color:var(--gold);padding-bottom:6px;border-bottom:2px solid var(--gold);font
 .track i{background:var(--ac)}
 .top h1{color:var(--ac)}
 .tbrand{flex:1;display:flex;align-items:center;justify-content:center;gap:8px}
-.tbrand h1{flex:none}
+.tbrand h1{flex:none;position:relative}
+.tbrand h1::after{content:"";position:absolute;left:100%;top:50%;transform:translateY(-50%);margin-left:8px;width:28px;height:28px;border-radius:7px;background:url(apple-touch-icon.png) center/cover no-repeat}
 .nobk{display:none!important}
 .ibtn{background:none;border:0;font-size:22px;width:40px;height:40px;padding:0;cursor:pointer;color:var(--ink,inherit);flex:none}
 #exp{color:var(--ac)}
@@ -89,7 +90,7 @@ h2{display:block;text-align:center;justify-content:center}
 <body>
 <main>
 <div id="demoBanner" style="display:none;background:var(--gold);color:#000;text-align:center;padding:6px 8px;font-size:13px;font-weight:600">Sample data · personal information hidden</div>
-<div class="top"><div class="tbrand"><h1 id="ptitle">Break Even</h1><img src="apple-touch-icon.png" alt="" width="28" height="28" style="border-radius:7px;flex:none"></div><button class="ibtn" id="bellBtn" aria-label="Notifications" style="position:relative">🔔<span id="bellDot" style="display:none;position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;background:#e53935"></span></button></div>
+<div class="top"><span aria-hidden="true" style="width:40px;flex:none"></span><div class="tbrand"><h1 id="ptitle">Break Even</h1></div><button class="ibtn" id="bellBtn" aria-label="Notifications" style="position:relative">🔔<span id="bellDot" style="display:none;position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;background:#e53935"></span></button></div>
 <div class="menu" id="menu" style="display:none"></div>
 
 <div class="card">
@@ -1129,7 +1130,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-25n",busy=false;
+(function(){var APP_BUILD="2026-11-25o",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
