@@ -292,6 +292,7 @@ setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("clo
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
 var UPD_SEED_AFTER="2026-11-25";
 var UPDATES=[
+{d:"2026-11-25",t:"Your accounts now appear on the Net worth tab automatically. You can remove any you don’t want counted."},
 {d:"2026-11-25",t:"A reminder set for a time that has already passed today starts tomorrow."},
 {d:"2026-11-25",t:"Notifications are removed automatically after 30 days."},
 {d:"2026-11-25",t:"The menu icon is replaced by a See all app updates button on the Notifications page."},
@@ -794,7 +795,7 @@ function nwItems(){if(!S.nw||!Array.isArray(S.nw.items))S.nw={items:[]};return S
 function r2(n){return Math.round(n*100)/100;}
 function todayStr(){return new Date().toLocaleDateString("en-CA");}
 function nwLatest(it,d){var best=null;it.snaps.forEach(function(x){if(x.d<=d&&(!best||x.d>=best.d))best=x;});return best;}
-function nwAt(d){var r=bal(d),cash=0;S.accts.forEach(function(a){cash+=r[a.id]||0;});var ta=0,td=0;nwItems().forEach(function(it){var x=nwLatest(it,d);if(!x)return;if(it.type==="debt")td+=x.amt;else ta+=x.amt;});return {cash:r2(cash),assets:r2(ta),debts:r2(td),net:r2(cash+ta-td)};}
+function nwAt(d){var r=bal(d),cash=0;S.accts.forEach(function(a){if(!a.nwOff)cash+=r[a.id]||0;});var ta=0,td=0;nwItems().forEach(function(it){var x=nwLatest(it,d);if(!x)return;if(it.type==="debt")td+=x.amt;else ta+=x.amt;});return {cash:r2(cash),assets:r2(ta),debts:r2(td),net:r2(cash+ta-td)};}
 function nwRender(){var items=nwItems(),t=todayStr(),now=nwAt(t);var tot=$("nwTot");tot.textContent=$$(now.net);tot.className=now.net<0?"neg":"pos";
 $("nwNote").textContent="Accounts "+$$(now.cash)+" + investments and other assets "+$$(now.assets)+" − debts "+$$(now.debts)+". Accounts follow your transactions; investments and debts follow the balances you enter.";
 var ds={};ds[t]=1;items.forEach(function(it){it.snaps.forEach(function(x){ds[x.d]=1;});});
@@ -806,7 +807,7 @@ var poly=pts.map(function(p,i){return X(i).toFixed(1)+","+Y(p.v).toFixed(1);}).j
 var dots=pts.map(function(p,i){return '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="3" style="fill:var(--ac)"/>';}).join("");
 ch.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:320px;display:block;margin:0 auto;overflow:visible"><polyline fill="none" stroke-width="2" style="stroke:var(--ac)" points="'+poly+'"/>'+dots+'</svg><div style="display:flex;justify-content:space-between;max-width:320px;margin:4px auto 0;font-size:12px;color:var(--mut)"><span>'+pts[0].d+'</span><span>'+pts[pts.length-1].d+'</span></div>';}
 else{var em0=document.createElement("div");em0.className="empty";em0.textContent="Your net worth chart appears once you have investment balances over time.";ch.appendChild(em0);}
-var L=$("nwList");L.innerHTML="";
+var L=$("nwList");L.innerHTML="";var rb=bal(t);var ah=document.createElement("div");ah.style.cssText="font-weight:700;margin:4px 0 6px";ah.textContent="Accounts";L.appendChild(ah);if(!S.accts.length){var ea=document.createElement("div");ea.className="empty";ea.textContent="Accounts you add appear here automatically.";L.appendChild(ea);}S.accts.forEach(function(a){var row=document.createElement("div");row.style.cssText="padding:8px 0;border-bottom:1px solid var(--bd)";var head=document.createElement("div");head.style.cssText="display:flex;justify-content:space-between;align-items:baseline;gap:8px";var nm=document.createElement("span");nm.textContent=alab(a);var v=document.createElement("b");var av=Math.round((rb[a.id]||0)*100)/100;v.textContent=$$(av);v.className=av<0?"neg":"";head.appendChild(nm);head.appendChild(v);row.appendChild(head);var sub=document.createElement("small");sub.style.color="var(--mut)";sub.textContent=a.nwOff?"Not counted in net worth":"Counted in net worth";row.appendChild(sub);var tg=document.createElement("button");tg.className=a.nwOff?"p":"rm";tg.textContent=a.nwOff?"Add back to net worth":"Remove from net worth";tg.style.cssText="width:100%;margin-top:6px";tg.onclick=function(){a.nwOff=!a.nwOff;save();nwRender();};row.appendChild(tg);L.appendChild(row);});var ih=document.createElement("div");ih.style.cssText="font-weight:700;margin:14px 0 6px";ih.textContent="Investments and debts";L.appendChild(ih);
 if(!items.length){var em=document.createElement("div");em.className="empty";em.textContent="No items yet. Add an investment or retirement account below and enter its balance.";L.appendChild(em);}
 items.forEach(function(it){var cur=nwLatest(it,t),row=document.createElement("div");row.style.cssText="padding:8px 0;border-bottom:1px solid var(--bd)";
  var head=document.createElement("div");head.style.cssText="display:flex;justify-content:space-between;align-items:baseline;gap:8px";
@@ -1130,7 +1131,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-25o",busy=false;
+(function(){var APP_BUILD="2026-11-25p",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
