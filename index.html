@@ -199,7 +199,7 @@ h2{display:block;text-align:center;justify-content:center}
 <button class="p" id="rs">Restore from pasted backup</button>
 <div id="bkm" style="color:var(--mut);font-size:13px;margin-top:6px"></div>
 </div>
-<div class="card"><h2>Cloud sign-in</h2><button class="p" id="sbSignBtn">Sign in to sync</button><div style="color:var(--mut);font-size:13px;margin-top:6px">Sign in once on each device. Your budget then syncs to your account.</div></div>
+<div class="card"><h2>Account</h2><div id="acctBox"></div><div id="remBox" style="margin-top:14px"></div></div>
 <div class="card"><h2>App lock</h2><div id="lkSet"></div></div>
 <div class="card"><h2>Spending breakdown</h2>
 <div class="row" style="flex-wrap:nowrap"><button class="nav" id="bp" aria-label="Previous month">‹</button><div id="blabel" style="text-align:center;align-self:center;font-weight:600"></div><button class="nav" id="bnx" aria-label="Next month">›</button></div>
@@ -281,15 +281,16 @@ window.onerror=function(m,s,l){try{document.getElementById("cloud").textContent=
 (function(){
 setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("cloud").textContent="Cloud error: "+(e&&e.message);}catch(x){}}},0);
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
-var KEY=DEMO?"expense-tracker-demo-v1":"expense-tracker-v1";
+var UID=null;try{UID=localStorage.getItem("be-uid");}catch(e){}
+var KEY=DEMO?"expense-tracker-demo-v1":(UID?"expense-tracker-u-"+UID:"expense-tracker-v1");
 function sampleData(){
 var now=new Date(),dd=now.getDate(),ym=now.getFullYear()+"-"+("0"+(now.getMonth()+1)).slice(-2);
 function D(n){return ym+"-"+("0"+n).slice(-2);}
 function ago(k){var x=new Date(now.getFullYear(),now.getMonth(),now.getDate()-k);return x.getFullYear()+"-"+("0"+(x.getMonth()+1)).slice(-2)+"-"+("0"+x.getDate()).slice(-2);}
 var CHK=1,FUND=2,CARD=3,tx=[],n=5000;
 function T(day,type,amt,note,cat,acct,extra){if(day>dd)return;var o={id:++n,date:D(day),type:type,amt:amt,note:note,cat:cat||"",ff:false,acct:acct};if(extra){for(var k in extra)o[k]=extra[k];}tx.push(o);}
-T(1,"income",2100,"Paycheck","Paycheck",CHK);
-T(15,"income",2100,"Paycheck","Paycheck",CHK);
+T(1,"income",3000,"Paycheck","Paycheck",CHK);
+T(15,"income",3000,"Paycheck","Paycheck",CHK);
 T(3,"expense",84.12,"Trader Joe's","Groceries",CARD);
 T(6,"expense",41.50,"Shell","Gas",CARD);
 T(9,"expense",32.80,"Chipotle","Eating Out",CARD);
@@ -302,7 +303,7 @@ T(10,"move",150,"Card payment – Credit card","",CHK,{to:CARD});
 var bills=[{id:101,name:"Rent",amt:1450,day:1,cat:"Rent/Conservice"},{id:102,name:"Electricity",amt:95,day:5,cat:"Electricity"},{id:103,name:"Internet",amt:70,day:7,cat:"Internet"},{id:104,name:"Phone",amt:40,day:12,cat:"Phone"},{id:105,name:"Car note",amt:320,day:20,cat:"Car Note"},{id:106,name:"Renters insurance",amt:140,day:28,cat:"Insurance"}];
 bills.forEach(function(b){b.freq="monthly";b.acct=CHK;if(b.id<=104&&b.day<=dd){var due=D(b.day);tx.push({id:++n,date:due,type:"expense",amt:b.amt,note:b.name,cat:b.cat,ff:false,acct:CHK,billId:b.id,billMonth:ym,billDue:due});}});
 var vb=[["Groceries",400],["Eating Out",150],["Gas",120],["Shopping",100],["Gifts",60],["Public Transit",40]].map(function(x,i){return {id:201+i,name:x[0],cat:x[0],amt:x[1]};});
-var plans={};plans[ym]={items:{"Groceries":"400","Eating Out":"150","Gas":"120","Shopping":"100","Gifts":"60"},inc:"4200"};
+var plans={};plans[ym]={items:{"Groceries":"400","Eating Out":"150","Gas":"120","Shopping":"100","Gifts":"60"},inc:"6000"};
 var nw={items:[{id:301,name:"401(k)",type:"asset",snaps:[{d:ago(30),amt:38000},{d:ago(0),amt:41250}]},{id:302,name:"Car loan",type:"debt",snaps:[{d:ago(0),amt:9200}]}]};
 return {accts:[{id:CHK,name:"Checking",start:"2400",bank:"",kind:"checking"},{id:FUND,name:"Fund",start:"800",bank:"",kind:"fund"},{id:CARD,name:"Credit card",start:"0",bank:"",kind:"card"}],
  tx:tx,bills:bills,vbudgets:vb,vbOv:{},billOv:{},
@@ -757,7 +758,7 @@ migratePf();migrateFf();migrateMvFund();buildAcc();tog();render();
 (function(){var keep=function(fn){return function(){var y=window.scrollY||0;try{return fn.apply(this,arguments);}finally{try{window.scrollTo(0,y);}catch(e){}}};};
  render=keep(render);renderBills=keep(renderBills);buildAcc=keep(buildAcc);buildCats=keep(buildCats);renderVB=keep(renderVB);buildPlan=keep(buildPlan);})();
 var PAGES=[["home","Overview"],["bills","Bills"],["cats","Categories"],["nw","Net worth"],["backup","Backup & sync"]];
-var CPMAP={"Net worth":"nw","Monthly Overview":"home","Accounts":"home","Entries":"home","Backup":"backup","App lock":"backup","Cloud sign-in":"backup","Categories":"cats","Monthly plan":"gone","Spending breakdown":"gone"};
+var CPMAP={"Account":"backup","Net worth":"nw","Monthly Overview":"home","Accounts":"home","Entries":"home","Backup":"backup","App lock":"backup","Cloud sign-in":"backup","Categories":"cats","Monthly plan":"gone","Spending breakdown":"gone"};
 function cardPage(c){var hh=c.querySelector("h2");var t="";if(hh){[].forEach.call(hh.childNodes,function(n){if(n.nodeType===3)t+=n.textContent;});t=t.trim();}return CPMAP[t]||"gone";}
 var cur="home";
 function buildMenu(){var mn=$("menu");mn.innerHTML="";PAGES.filter(function(g){return MENUP.indexOf(g[0])>-1;}).forEach(function(g){var b=document.createElement("button");b.className="mi"+(g[0]===cur?" on":"");b.textContent=g[1];b.onclick=function(){showPage(g[0]);};mn.appendChild(b);});}
@@ -915,23 +916,71 @@ function sbRef(uid){var c=sbClient();return {
  get:function(){return c.from("budget_data").select("data,updated_at").eq("user_id",uid).maybeSingle().then(function(r){if(r.error)throw r.error;var row=r.data;return {exists:!!row,data:function(){var d=row&&row.data;return d?{json:d.json||null,updatedAt:d.updatedAt||0}:null;}};});},
  set:function(v){return c.from("budget_data").upsert({user_id:uid,data:{json:v.json,updatedAt:v.updatedAt},updated_at:new Date().toISOString()}).then(function(r){if(r.error)throw r.error;});}};}
 function sbInit(){if(DEMO)return;sbLoad(function(){try{sbClient().auth.getSession().then(function(r){var ses=r.data&&r.data.session;if(!ses){cmsg("Sign in to sync your data (Backup → Cloud sign-in).");return;}CL.ref=sbRef(ses.user.id);csync();}).catch(function(){cmsg("Cloud save unavailable. Your data stays on this device.");});}catch(e){cmsg("Cloud save unavailable. Your data stays on this device.");}});}
-function sbModal(){var ov=document.createElement("div");ov.id="sbModalOv";ov.style.cssText="position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:210;padding:16px;box-sizing:border-box";
+function fmtHM(v){var hh=+v.slice(0,2),mm=v.slice(3);return (hh%12||12)+":"+mm+" "+(hh>=12?"PM":"AM");}
+function useAccount(uid,email){try{var k="expense-tracker-u-"+uid;
+ if(!localStorage.getItem(k)){var legacy=localStorage.getItem("expense-tracker-v1");
+  if(legacy&&window.confirm("Use the budget data already on this device for this account? Press Cancel to start this account empty."))localStorage.setItem(k,legacy);}
+ localStorage.setItem("be-uid",uid);localStorage.setItem("be-email",email||"");localStorage.setItem("be-demo","0");}catch(e){}
+ location.reload();}
+function sbModal(mode){mode=mode||"in";
+ var ov=document.createElement("div");ov.id="sbModalOv";ov.style.cssText="position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:210;padding:16px;box-sizing:border-box";
  var box=document.createElement("div");box.style.cssText="background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;max-width:320px;width:100%;text-align:center";
- var h=document.createElement("div");h.style.cssText="font-weight:800;font-size:16px;margin-bottom:10px";h.textContent="Sign in to sync";
+ var h=document.createElement("div");h.style.cssText="font-weight:800;font-size:16px;margin-bottom:10px";
  var em=document.createElement("input");em.type="email";em.placeholder="Email";em.autocomplete="username";
- var pw=document.createElement("input");pw.type="password";pw.placeholder="Password";pw.autocomplete="current-password";
+ var pw=document.createElement("input");pw.type="password";pw.placeholder="Password (6+ characters)";
  [em,pw].forEach(function(i){i.style.cssText="max-width:240px;width:100%;display:block;margin:0 auto 8px;text-align:center";});
- var m=document.createElement("div");m.style.cssText="color:#b00;font-size:13px;min-height:18px";
+ var m=document.createElement("div");m.style.cssText="color:#b00;font-size:13px;min-height:18px;line-height:1.4";
  var row=document.createElement("div");row.style.cssText="display:flex;flex-direction:column;gap:8px;margin-top:8px";
- var ok=document.createElement("button");ok.className="p";ok.textContent="Sign in";
+ var ok=document.createElement("button");ok.className="p";
+ var sw=document.createElement("button");sw.style.cssText="width:100%;margin:0;background:none;color:var(--ac);border:0;padding:6px;font-size:14px;cursor:pointer";
  var cn=document.createElement("button");cn.textContent="Cancel";cn.style.cssText="width:100%;margin:0;background:#c62828;color:#fff;border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer";
  function close(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
+ function paint(){var up=mode==="up";h.textContent=up?"Create account":"Sign in";ok.textContent=up?"Create account":"Sign in";sw.textContent=up?"I already have an account":"Create an account";pw.autocomplete=up?"new-password":"current-password";}
+ sw.onclick=function(){mode=mode==="up"?"in":"up";m.textContent="";paint();};
  cn.onclick=close;
- ok.onclick=function(){m.style.color="var(--mut)";m.textContent="Signing in…";sbLoad(function(){sbClient().auth.signInWithPassword({email:em.value.trim(),password:pw.value}).then(function(r){
-   if(r.error){m.style.color="#b00";m.textContent="Sign-in failed: "+r.error.message;return;}
-   CL.ref=sbRef(r.data.user.id);close();csync();}).catch(function(){m.style.color="#b00";m.textContent="Sign-in failed. Check your connection.";});});};
- row.appendChild(ok);row.appendChild(cn);box.appendChild(h);box.appendChild(em);box.appendChild(pw);box.appendChild(m);box.appendChild(row);ov.appendChild(box);document.body.appendChild(ov);em.focus();}
-var sbBtn=document.getElementById("sbSignBtn");if(sbBtn)sbBtn.onclick=sbModal;
+ ok.onclick=function(){var email=em.value.trim(),pwd=pw.value;
+  if(!email||!pwd){m.style.color="#b00";m.textContent="Enter your email and password.";return;}
+  m.style.color="var(--mut)";m.textContent=mode==="up"?"Creating account…":"Signing in…";
+  sbLoad(function(){var c=sbClient();var pr=mode==="up"?c.auth.signUp({email:email,password:pwd}):c.auth.signInWithPassword({email:email,password:pwd});
+   pr.then(function(r){
+    if(r.error){m.style.color="#b00";m.textContent=(mode==="up"?"Sign-up":"Sign-in")+" failed: "+r.error.message;return;}
+    var user=r.data&&r.data.user,ses=r.data&&r.data.session;
+    if(mode==="up"&&!ses){m.style.color="var(--mut)";m.textContent="Account created. Check your email to confirm it, then sign in.";return;}
+    if(!user){m.style.color="#b00";m.textContent="Sign-in failed. Try again.";return;}
+    useAccount(user.id,email);
+   }).catch(function(){m.style.color="#b00";m.textContent="Connection problem. Try again.";});});};
+ row.appendChild(ok);row.appendChild(sw);row.appendChild(cn);box.appendChild(h);box.appendChild(em);box.appendChild(pw);box.appendChild(m);box.appendChild(row);ov.appendChild(box);document.body.appendChild(ov);paint();em.focus();}
+function acctSignOut(){function done(){try{localStorage.removeItem("be-uid");localStorage.removeItem("be-email");localStorage.setItem("be-demo","1");}catch(e){}location.reload();}
+ try{sbLoad(function(){sbClient().auth.signOut().then(done).catch(done);});}catch(e){done();}}
+function acctRender(){var box=$("acctBox");if(!box)return;box.innerHTML="";
+ var msg=document.createElement("div");msg.style.cssText="color:var(--mut);font-size:13px;line-height:1.5;margin-bottom:8px";
+ var btns=document.createElement("div");btns.style.cssText="display:flex;flex-direction:column;gap:8px";
+ if(UID){msg.textContent="Signed in as "+(localStorage.getItem("be-email")||"your account")+". Your budget syncs to this account.";
+  var so=document.createElement("button");so.className="rm";so.textContent="Sign out of account";so.onclick=acctSignOut;btns.appendChild(so);}
+ else{msg.textContent="Create an account or sign in to sync your budget to the cloud.";
+  var a=document.createElement("button");a.className="p";a.textContent="Sign in";a.onclick=function(){sbModal("in");};
+  var c=document.createElement("button");c.className="p";c.textContent="Create account";c.onclick=function(){sbModal("up");};
+  btns.appendChild(a);btns.appendChild(c);}
+ box.appendChild(msg);box.appendChild(btns);remRender();}
+function remRender(){var box=$("remBox");if(!box)return;box.innerHTML="";
+ var h=document.createElement("div");h.style.cssText="font-weight:700;margin-bottom:6px";h.textContent="Daily reminder";
+ var sel=document.createElement("select");sel.id="remSel";
+ var off=document.createElement("option");off.value="";off.textContent="Off";sel.appendChild(off);
+ for(var mins=300;mins<=1320;mins+=30){var v=("0"+Math.floor(mins/60)).slice(-2)+":"+("0"+(mins%60)).slice(-2);var o=document.createElement("option");o.value=v;o.textContent=fmtHM(v);sel.appendChild(o);}
+ sel.value=S.remind||"";
+ sel.onchange=function(){S.remind=sel.value;save();remNote();};
+ var note=document.createElement("div");note.id="remNote";note.style.cssText="color:var(--mut);font-size:13px;margin-top:6px;line-height:1.5";
+ var al=document.createElement("button");al.className="p";al.textContent="Allow notifications";al.style.marginTop="8px";
+ al.onclick=function(){if(!("Notification" in window)){remNote("Notifications aren’t supported in this browser. On iPhone, add Break Even to your Home Screen first.");return;}Notification.requestPermission().then(function(){remNote();});};
+ box.appendChild(h);box.appendChild(sel);box.appendChild(note);box.appendChild(al);remNote();}
+function remNote(extra){var n=$("remNote");if(!n)return;var t=extra||"";
+ if(!t){if(!S.remind)t="No reminder set.";else if(!("Notification" in window))t="Notifications aren’t supported in this browser.";else if(Notification.permission!=="granted")t="Tap Allow notifications so the reminder can show.";else t="Reminder set for "+fmtHM(S.remind)+". It shows when the app is open or on your Home Screen.";}
+ n.textContent=t;}
+function remCheck(){if(DEMO||!S.remind||!("Notification" in window)||Notification.permission!=="granted")return;
+ var d=new Date(),hm=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);if(hm<S.remind)return;
+ var k="be-rem-"+todayStr();try{if(localStorage.getItem(k))return;localStorage.setItem(k,"1");}catch(e){}
+ try{new Notification("Break Even",{body:"Log any new entries and check your account balances.",tag:"be-daily"});}catch(e){}}
+acctRender();setInterval(function(){try{remCheck();}catch(e){}},30000);
 
 })();
 
@@ -1019,7 +1068,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-25b",busy=false;
+(function(){var APP_BUILD="2026-11-25c",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
