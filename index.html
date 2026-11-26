@@ -292,6 +292,7 @@ setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("clo
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
 var UPD_SEED_AFTER="2026-11-25";
 var UPDATES=[
+{d:"2026-11-25",t:"The Sign out button on the More page only appears when you are signed in or viewing the sample app."},
 {d:"2026-11-25",t:"A PIN can only be created after you sign in."},
 {d:"2026-11-25",t:"Your accounts now appear on the Net worth tab automatically. You can remove any you don’t want counted."},
 {d:"2026-11-25",t:"A reminder set for a time that has already passed today starts tomorrow."},
@@ -977,7 +978,8 @@ function sbModal(mode){mode=mode||"in";
  row.appendChild(ok);row.appendChild(sw);row.appendChild(cn);box.appendChild(h);box.appendChild(em);box.appendChild(pw);box.appendChild(m);box.appendChild(row);ov.appendChild(box);document.body.appendChild(ov);paint();em.focus();}
 function acctSignOut(){function done(){try{localStorage.removeItem("be-uid");localStorage.removeItem("be-email");localStorage.removeItem("expense-tracker-demo-v1");localStorage.setItem("be-demo","1");}catch(e){}location.reload();}
  try{sbLoad(function(){sbClient().auth.signOut().then(done).catch(done);});}catch(e){done();}}
-function backupGate(){var c=cards.filter(function(x){var h=x.querySelector("h2");return h&&h.textContent.replace(/[▲▼]/g,"").trim()==="Backup";})[0];if(!c)return;c.classList.toggle("nobk",!!DEMO);var bb=$("bkBox"),nd=$("bkNeed");if(bb)bb.style.display=UID?"":"none";if(nd)nd.style.display=UID?"none":"";}
+function signOutGate(){var so=cards.filter(function(x){var h=x.querySelector("h2");return h&&h.textContent.replace(/[▲▼]/g,"").trim()==="Sign out";})[0];if(so)so.classList.toggle("nobk",!UID&&!DEMO);}
+function backupGate(){signOutGate();var c=cards.filter(function(x){var h=x.querySelector("h2");return h&&h.textContent.replace(/[▲▼]/g,"").trim()==="Backup";})[0];if(!c)return;c.classList.toggle("nobk",!!DEMO);var bb=$("bkBox"),nd=$("bkNeed");if(bb)bb.style.display=UID?"":"none";if(nd)nd.style.display=UID?"none":"";}
 function acctDelete(){if(!window.confirm("Delete your account and all of its budget data, including the copy in the cloud? This can’t be undone."))return;sbLoad(function(){sbClient().rpc("delete_my_account").then(function(r){if(r.error){window.alert("Couldn’t delete the account: "+r.error.message);return;}try{localStorage.removeItem("expense-tracker-u-"+UID);localStorage.removeItem("be-uid");localStorage.removeItem("be-email");localStorage.removeItem("expense-tracker-demo-v1");localStorage.setItem("be-demo","1");}catch(e){}sbClient().auth.signOut().then(function(){location.reload();}).catch(function(){location.reload();});}).catch(function(){window.alert("Couldn’t reach the server. Check your connection and try again.");});});}
 function acctRender(){var box=$("acctBox");if(!box)return;box.innerHTML="";
  var msg=document.createElement("div");msg.style.cssText="color:var(--mut);font-size:13px;line-height:1.5;margin-bottom:8px";
@@ -1134,7 +1136,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-25q",busy=false;
+(function(){var APP_BUILD="2026-11-25r",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
