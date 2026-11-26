@@ -292,6 +292,7 @@ setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("clo
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
 var UPD_SEED_AFTER="2026-11-25";
 var UPDATES=[
+{d:"2026-11-25",t:"A PIN can only be created after you sign in."},
 {d:"2026-11-25",t:"Your accounts now appear on the Net worth tab automatically. You can remove any you don’t want counted."},
 {d:"2026-11-25",t:"A reminder set for a time that has already passed today starts tomorrow."},
 {d:"2026-11-25",t:"Notifications are removed automatically after 30 days."},
@@ -1105,11 +1106,13 @@ function fidUnlock(){var id=fidGet(),m=document.getElementById("lkFidMsg");if(!i
  if(m)m.textContent="";
  navigator.credentials.get({publicKey:{challenge:rnd(32),rpId:location.hostname,allowCredentials:[{type:"public-key",id:unb64u(id)}],userVerification:"required",timeout:60000}})
  .then(function(){lockHide();}).catch(function(){if(m)m.textContent="Face ID didn’t work. Use your PIN.";});}
+function signedIn(){try{return !!localStorage.getItem("be-uid");}catch(e){return false;}}
 function lkRender(){var el=document.getElementById("lkSet");if(!el)return;el.innerHTML="";var on=!!pinGet();
  var msg=document.createElement("div");msg.style.cssText="color:var(--mut);font-size:14px;margin-bottom:10px";
- msg.textContent=on?"The lock is on. The app asks for your PIN when it opens or comes back from the background.":"The lock is off. Create a 4-digit PIN to lock the app.";el.appendChild(msg);
+ msg.textContent=on?"The lock is on. The app asks for your PIN when it opens or comes back from the background.":(signedIn()?"The lock is off. Create a 4-digit PIN to lock the app.":"The lock is off.");el.appendChild(msg);
  var m=document.createElement("div");m.style.cssText="color:#b00;font-size:13px;margin-bottom:8px";
  var b=document.createElement("button");b.className="p";b.style.marginTop="0";
+ if(!on&&!signedIn()){var nl=document.createElement("div");nl.style.cssText="color:var(--mut);font-size:14px;line-height:1.5";nl.textContent="Sign in or create an account first. You can create a PIN once you are signed in.";el.appendChild(nl);return;}
  if(!on){b.textContent="Create PIN";b.onclick=function(){pinModal("Create PIN","New 4-digit PIN","Next",function(v,done){
     if(!/^\d{4}$/.test(v)){done("PIN must be 4 digits.");return;}
     done(null);
@@ -1131,7 +1134,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-25p",busy=false;
+(function(){var APP_BUILD="2026-11-25q",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
