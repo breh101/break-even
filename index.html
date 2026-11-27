@@ -204,7 +204,7 @@ h2{display:block;text-align:center;justify-content:center}
 <div id="bkm" style="color:var(--mut);font-size:13px;margin-top:6px"></div>
 </div>
 </div>
-<div class="card"><h2>Account</h2><div id="acctBox"></div><div id="remBox" style="margin-top:14px"></div></div>
+<div class="card"><h2>Account</h2><div id="acctBox"></div></div>
 <div class="card"><h2>App lock</h2><div id="lkSet"></div></div>
 <div class="card"><h2>Spending breakdown</h2>
 <div class="row" style="flex-wrap:nowrap"><button class="nav" id="bp" aria-label="Previous month">‹</button><div id="blabel" style="text-align:center;align-self:center;font-weight:600"></div><button class="nav" id="bnx" aria-label="Next month">›</button></div>
@@ -292,6 +292,7 @@ setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("clo
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
 var UPD_SEED_AFTER="2026-11-25";
 var UPDATES=[
+{d:"2026-11-27",t:"Daily reminders now say what they are for, and the sign out and delete account buttons sit at the bottom of the Account section."},
 {d:"2026-11-27",t:"When you edit a bill, “This month and every month after” keeps earlier months as they were."},
 {d:"2026-11-25",t:"If your budget is missing after signing in, the Account section can bring in the budget saved on this device."},
 {d:"2026-11-25",t:"The Sign out button on the More page only appears when you are signed in or viewing the sample app."},
@@ -993,9 +994,9 @@ function acctRender(){var box=$("acctBox");if(!box)return;box.innerHTML="";
   var a=document.createElement("button");a.className="p";a.textContent="Sign in";a.onclick=function(){sbModal("in");};
   var c=document.createElement("button");c.className="p";c.textContent="Create account";c.onclick=function(){sbModal("up");};
   btns.appendChild(a);btns.appendChild(c);}
- box.appendChild(msg);box.appendChild(btns);remRender();}
+ var rbx=document.createElement("div");rbx.id="remBox";rbx.style.cssText="margin:14px 0;padding-top:12px;border-top:1px solid var(--bd)";box.appendChild(msg);box.appendChild(rbx);box.appendChild(btns);remRender();}
 function remRender(){var box=$("remBox");if(!box)return;box.innerHTML="";
- var h=document.createElement("div");h.style.cssText="font-weight:700;margin-bottom:6px";h.textContent="Daily reminder";
+ var h=document.createElement("div");h.style.cssText="font-weight:700;margin-bottom:6px";h.textContent="Notifications";
  var sel=document.createElement("select");sel.id="remSel";
  var off=document.createElement("option");off.value="";off.textContent="Off";sel.appendChild(off);
  for(var mins=300;mins<=1320;mins+=30){var v=("0"+Math.floor(mins/60)).slice(-2)+":"+("0"+(mins%60)).slice(-2);var o=document.createElement("option");o.value=v;o.textContent=fmtHM(v);sel.appendChild(o);}
@@ -1004,7 +1005,7 @@ function remRender(){var box=$("remBox");if(!box)return;box.innerHTML="";
  var note=document.createElement("div");note.id="remNote";note.style.cssText="color:var(--mut);font-size:13px;margin-top:6px;line-height:1.5";
  var al=document.createElement("button");al.className="p";al.textContent="Allow notifications";al.style.marginTop="8px";
  al.onclick=function(){if(!("Notification" in window)){remNote("Notifications aren’t supported in this browser. On iPhone, add Break Even to your Home Screen first.");return;}Notification.requestPermission().then(function(){remNote();});};
- box.appendChild(h);box.appendChild(sel);box.appendChild(note);box.appendChild(al);remNote();}
+ var wsel=document.createElement("select");wsel.id="remWhat";wsel.style.cssText="margin-top:6px";[["both","Log entries and check balances"],["expense","Log new expenses and income"],["balances","Check my account balances"]].forEach(function(o){var x=document.createElement("option");x.value=o[0];x.textContent=o[1];wsel.appendChild(x);});wsel.value=S.remWhat||"both";wsel.onchange=function(){S.remWhat=wsel.value;save();remNote();};var wl=document.createElement("label");wl.textContent="Remind me to";box.appendChild(h);box.appendChild(sel);box.appendChild(wl);box.appendChild(wsel);box.appendChild(note);box.appendChild(al);remNote();}
 function remNote(extra){var n=$("remNote");if(!n)return;var t=extra||"";
  if(!t){if(!S.remind)t="No reminder set.";else if(!("Notification" in window))t="Notifications aren’t supported in this browser.";else if(Notification.permission!=="granted")t="Tap Allow notifications so the reminder can show.";else t="Reminder set for "+fmtHM(S.remind)+". It shows when the app is open or on your Home Screen.";}
  n.textContent=t;}
@@ -1045,10 +1046,11 @@ function notesRender(){var box=$("noteList");if(!box)return;box.innerHTML="";var
   var d=document.createElement("div");d.style.cssText="color:var(--mut);font-size:13px";d.textContent=fmtDate(n.d)+(n.kind==="update"?" · Update":n.kind==="reminder"?" · Reminder":"");var t=document.createElement("div");t.textContent=n.text;r.appendChild(d);r.appendChild(t);box.appendChild(r);});
  notesSet(a.map(function(n){n.read=true;return n;}));bellRender();}
 
+function remBody(){var w=S.remWhat||"both";return w==="expense"?"Time to log any new expenses and income.":w==="balances"?"Time to check your account balances.":"Time to log any new entries and check your account balances.";}
 function remCheck(){if(DEMO||!S.remind)return;if(S.remindFrom&&todayStr()<S.remindFrom)return;
  var d=new Date(),hm=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);if(hm<S.remind)return;
  var k="be-rem-"+todayStr();try{if(localStorage.getItem(k))return;localStorage.setItem(k,"1");}catch(e){}
- addNote("reminder","Log any new entries and check your account balances.");if("Notification" in window&&Notification.permission==="granted"){try{new Notification("Break Even",{body:"Log any new entries and check your account balances.",tag:"be-daily"});}catch(e){}}}
+ addNote("reminder",remBody());if("Notification" in window&&Notification.permission==="granted"){try{new Notification("Break Even",{body:remBody(),tag:"be-daily"});}catch(e){}}}
 acctRender();try{checkUpdates();bellRender();$("seeUpd").onclick=function(){showPage("updates");};$("bellBtn").onclick=function(){showPage("notes");};$("noteClear").onclick=function(){notesSet([]);notesRender();};}catch(e){}setInterval(function(){try{remCheck();}catch(e){}try{nwRemCheck();}catch(e){}},30000);
 
 })();
@@ -1139,7 +1141,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-27a",busy=false;
+(function(){var APP_BUILD="2026-11-27b",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
