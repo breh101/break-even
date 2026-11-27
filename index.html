@@ -294,6 +294,7 @@ setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("clo
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
 var UPD_SEED_AFTER="2026-11-25";
 var UPDATES=[
+{d:"2026-11-27",t:"Tap the bell again to close Notifications and return to the page you were on."},
 {d:"2026-11-27",t:"Signing out returns to a home screen with a Try sample budget button. Your PIN or Face ID is only asked after you sign in."},
 {d:"2026-11-27",t:"Sign out and Delete account now sit in their own Sign out section, which appears only when you are signed in."},
 {d:"2026-11-27",t:"Daily reminders now say what they are for, and the sign out and delete account buttons sit at the bottom of the Account section."},
@@ -1055,7 +1056,7 @@ function remCheck(){if(DEMO||!S.remind)return;if(S.remindFrom&&todayStr()<S.remi
  var d=new Date(),hm=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);if(hm<S.remind)return;
  var k="be-rem-"+todayStr();try{if(localStorage.getItem(k))return;localStorage.setItem(k,"1");}catch(e){}
  addNote("reminder",remBody());if("Notification" in window&&Notification.permission==="granted"){try{new Notification("Break Even",{body:remBody(),tag:"be-daily"});}catch(e){}}}
-acctRender();try{checkUpdates();bellRender();$("seeUpd").onclick=function(){showPage("updates");};$("bellBtn").onclick=function(){showPage("notes");};$("noteClear").onclick=function(){notesSet([]);notesRender();};}catch(e){}setInterval(function(){try{remCheck();}catch(e){}try{nwRemCheck();}catch(e){}},30000);
+acctRender();try{checkUpdates();bellRender();$("seeUpd").onclick=function(){showPage("updates");};var bellBack="home";$("bellBtn").onclick=function(){if(cur==="notes"){showPage(bellBack||"home");}else{bellBack=cur;showPage("notes");}};$("noteClear").onclick=function(){notesSet([]);notesRender();};}catch(e){}setInterval(function(){try{remCheck();}catch(e){}try{nwRemCheck();}catch(e){}},30000);
 
 })();
 
@@ -1146,7 +1147,7 @@ if(pinGet()&&signedIn()&&!demoOn())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&signedIn()&&!demoOn()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-27d",busy=false;
+(function(){var APP_BUILD="2026-11-27e",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
