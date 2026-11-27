@@ -294,6 +294,7 @@ setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("clo
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
 var UPD_SEED_AFTER="2026-11-25";
 var UPDATES=[
+{d:"2026-11-27",t:"The sample budget no longer shows Account or App lock. Sign in and Create account are on the home screen."},
 {d:"2026-11-27",t:"Tap the bell again to close Notifications and return to the page you were on."},
 {d:"2026-11-27",t:"Signing out returns to a home screen with a Try sample budget button. Your PIN or Face ID is only asked after you sign in."},
 {d:"2026-11-27",t:"Sign out and Delete account now sit in their own Sign out section, which appears only when you are signed in."},
@@ -987,7 +988,7 @@ function sbModal(mode){mode=mode||"in";
 function acctSignOut(){function done(){try{localStorage.removeItem("be-uid");localStorage.removeItem("be-email");localStorage.removeItem("expense-tracker-demo-v1");localStorage.setItem("be-demo","0");}catch(e){}location.reload();}
  try{sbLoad(function(){sbClient().auth.signOut().then(done).catch(done);});}catch(e){done();}}
 function signOutGate(){var so=cards.filter(function(x){var h=x.querySelector("h2");return h&&h.textContent.replace(/[▲▼]/g,"").trim()==="Sign out";})[0];if(!so)return;so.classList.toggle("nobk",!UID);var box=$("soBox");if(!box||!UID)return;box.innerHTML="";var a1=document.createElement("button");a1.className="p";a1.style.width="100%";a1.textContent="Sign out";a1.onclick=acctSignOut;box.appendChild(a1);var d1=document.createElement("button");d1.textContent="Delete account";d1.style.cssText="width:100%;margin-top:8px;background:#c62828;color:#fff;border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer";d1.onclick=acctDelete;box.appendChild(d1);}
-function backupGate(){signOutGate();var c=cards.filter(function(x){var h=x.querySelector("h2");return h&&h.textContent.replace(/[▲▼]/g,"").trim()==="Backup";})[0];if(!c)return;c.classList.toggle("nobk",!!DEMO);var bb=$("bkBox"),nd=$("bkNeed");if(bb)bb.style.display=UID?"":"none";if(nd)nd.style.display=UID?"none":"";}
+function backupGate(){signOutGate();["Account","App lock"].forEach(function(n){var x=cards.filter(function(y){var h=y.querySelector("h2");return h&&h.textContent.replace(/[▲▼]/g,"").trim()===n;})[0];if(x)x.classList.toggle("nobk",!UID);});var c=cards.filter(function(x){var h=x.querySelector("h2");return h&&h.textContent.replace(/[▲▼]/g,"").trim()==="Backup";})[0];if(!c)return;c.classList.toggle("nobk",!!DEMO);var bb=$("bkBox"),nd=$("bkNeed");if(bb)bb.style.display=UID?"":"none";if(nd)nd.style.display=UID?"none":"";}
 function acctDelete(){if(!window.confirm("Delete your account and all of its budget data, including the copy in the cloud? This can’t be undone."))return;sbLoad(function(){sbClient().rpc("delete_my_account").then(function(r){if(r.error){window.alert("Couldn’t delete the account: "+r.error.message);return;}try{localStorage.removeItem("expense-tracker-u-"+UID);localStorage.removeItem("be-uid");localStorage.removeItem("be-email");localStorage.removeItem("expense-tracker-demo-v1");localStorage.setItem("be-demo","1");}catch(e){}sbClient().auth.signOut().then(function(){location.reload();}).catch(function(){location.reload();});}).catch(function(){window.alert("Couldn’t reach the server. Check your connection and try again.");});});}
 function importLegacy(){if(!window.confirm("Replace the budget in this account with the budget saved on this device?"))return;try{var p=JSON.parse(localStorage.getItem("expense-tracker-v1"));p.updated=Date.now();localStorage.setItem("expense-tracker-u-"+UID,JSON.stringify(p));}catch(e){window.alert("Couldn’t bring in the data from this device.");return;}location.reload();}
 function acctRender(){var box=$("acctBox");if(!box)return;box.innerHTML="";
@@ -995,10 +996,7 @@ function acctRender(){var box=$("acctBox");if(!box)return;box.innerHTML="";
  var btns=document.createElement("div");btns.style.cssText="display:flex;flex-direction:column;gap:8px";
  if(UID){msg.textContent="Signed in as "+(localStorage.getItem("be-email")||"your account")+". Your budget syncs to this account.";
   var so=document.createElement("button");so.className="p";var lg=0,cu=0;try{lg=(JSON.parse(localStorage.getItem("expense-tracker-v1"))||{tx:[]}).tx.length;}catch(e){}try{cu=(JSON.parse(localStorage.getItem("expense-tracker-u-"+UID))||{tx:[]}).tx.length;}catch(e){}if(lg>0&&cu<lg){msg.textContent+=" This device has "+lg+" entries and this account has "+cu+".";var ib=document.createElement("button");ib.className="p";ib.textContent="Bring in budget data from this device";ib.onclick=importLegacy;btns.appendChild(ib);}}
- else{msg.textContent="Create an account or sign in to sync your budget to the cloud.";
-  var a=document.createElement("button");a.className="p";a.textContent="Sign in";a.onclick=function(){sbModal("in");};
-  var c=document.createElement("button");c.className="p";c.textContent="Create account";c.onclick=function(){sbModal("up");};
-  btns.appendChild(a);btns.appendChild(c);}
+ else{msg.textContent="";}
  var rbx=document.createElement("div");rbx.id="remBox";rbx.style.cssText="margin:14px 0;padding-top:12px;border-top:1px solid var(--bd)";box.appendChild(msg);box.appendChild(rbx);box.appendChild(btns);remRender();}
 function remRender(){var box=$("remBox");if(!box)return;box.innerHTML="";
  var h=document.createElement("div");h.style.cssText="font-weight:700;margin-bottom:6px";h.textContent="Notifications";
@@ -1147,7 +1145,7 @@ if(pinGet()&&signedIn()&&!demoOn())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&signedIn()&&!demoOn()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-27e",busy=false;
+(function(){var APP_BUILD="2026-11-27f",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
