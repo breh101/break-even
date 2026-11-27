@@ -66,6 +66,7 @@ h2{color:var(--gold);padding-bottom:6px;border-bottom:2px solid var(--gold);font
 .tbrand h1{flex:none;position:relative}
 .tbrand h1::after{content:"";position:absolute;left:100%;top:50%;transform:translateY(-50%);margin-left:8px;width:28px;height:28px;border-radius:7px;background:url(apple-touch-icon.png) center/cover no-repeat}
 .nobk{display:none!important}
+@keyframes bfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .ibtn{background:none;border:0;font-size:22px;width:40px;height:40px;padding:0;cursor:pointer;color:var(--ink,inherit);flex:none}
 #exp{color:var(--ac)}
 .sub{color:var(--gold);font-weight:700}
@@ -89,7 +90,8 @@ h2{display:block;text-align:center;justify-content:center}
 </head>
 <body>
 <main>
-<div id="demoBanner" style="display:none;background:var(--gold);color:#000;text-align:center;padding:6px 8px;font-size:13px;font-weight:600">Sample data · personal information hidden</div>
+<div id="landing" style="display:none;position:fixed;inset:0;z-index:150;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;text-align:center"><img src="apple-touch-icon.png" alt="" width="120" height="120" style="border-radius:28px;box-shadow:0 14px 30px rgba(0,0,0,.22);animation:bfloat 3.2s ease-in-out infinite"><h1 style="font-size:34px;margin:18px 0 6px">Break Even</h1><p style="color:var(--mut);max-width:300px;line-height:1.5;margin:0">Track your spending, bills and budgets, and see what you can really spend before payday.</p><button class="p" id="landSignIn" style="width:100%;max-width:280px;margin-top:22px">Sign in</button><button id="landCreate" style="width:100%;max-width:280px;margin-top:10px;background:none;color:var(--ac);border:1px solid var(--ac);border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer">Create account</button><button id="landSample" style="width:100%;max-width:280px;margin-top:10px;background:none;color:var(--mut);border:0;padding:10px;font-size:15px;cursor:pointer;text-decoration:underline">Try sample budget</button></div>
+<div id="demoBanner" style="display:none;background:var(--gold);color:#000;text-align:center;padding:6px 8px;font-size:13px;font-weight:600">Sample data · personal information hidden <button id="demoExit" style="margin-left:6px;background:none;border:1px solid #000;border-radius:8px;padding:2px 8px;font-size:12px;font-weight:600;cursor:pointer">Exit sample</button></div>
 <div class="top"><span aria-hidden="true" style="width:40px;flex:none"></span><div class="tbrand"><h1 id="ptitle">Break Even</h1></div><button class="ibtn" id="bellBtn" aria-label="Notifications" style="position:relative">🔔<span id="bellDot" style="display:none;position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;background:#e53935"></span></button></div>
 <div class="menu" id="menu" style="display:none"></div>
 
@@ -292,6 +294,7 @@ setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("clo
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
 var UPD_SEED_AFTER="2026-11-25";
 var UPDATES=[
+{d:"2026-11-27",t:"Signing out returns to a home screen with a Try sample budget button. Your PIN or Face ID is only asked after you sign in."},
 {d:"2026-11-27",t:"Sign out and Delete account now sit in their own Sign out section, which appears only when you are signed in."},
 {d:"2026-11-27",t:"Daily reminders now say what they are for, and the sign out and delete account buttons sit at the bottom of the Account section."},
 {d:"2026-11-27",t:"When you edit a bill, “This month and every month after” keeps earlier months as they were."},
@@ -916,7 +919,7 @@ $("bp").onclick=function(){$("mp").onclick();};
 $("bnx").onclick=function(){$("mn").onclick();};
 buildCats();var sp0="home";try{sp0=sessionStorage.getItem("be-page")||"home";}catch(e){}if(!PAGES.some(function(g){return g[0]===sp0;}))sp0="home";buildTabs();showPage(sp0);
 booting=false;
-try{if(DEMO)$("demoBanner").style.display="";}catch(e){}
+try{if(DEMO)$("demoBanner").style.display="";$("landing").style.display=(!UID&&!DEMO)?"flex":"none";$("landSignIn").onclick=function(){sbModal("in");};$("landCreate").onclick=function(){sbModal("up");};$("landSample").onclick=function(){try{localStorage.setItem("be-demo","1");localStorage.removeItem("expense-tracker-demo-v1");}catch(e){}location.reload();};$("demoExit").onclick=function(){try{localStorage.setItem("be-demo","0");}catch(e){}location.reload();};}catch(e){}
 var CL={ref:null,busy:false,dirty:false,t:null};
 function cmsg(s){$("cloud").textContent=s;var lw=$("loadWarn");if(lw)lw.style.display=/isn.t available|unavailable/i.test(s)?"":"none";var sp=$("syncPill");if(sp)sp.style.display=/checking|saving/i.test(s)?"":"none";}
 function queuePush(){if(!CL.ref||DEMO)return;clearTimeout(CL.t);CL.t=setTimeout(cpush,1500);}
@@ -980,7 +983,7 @@ function sbModal(mode){mode=mode||"in";
     useAccount(user.id,email);
    }).catch(function(){m.style.color="#b00";m.textContent="Connection problem. Try again.";});});};
  row.appendChild(ok);row.appendChild(sw);row.appendChild(cn);box.appendChild(h);box.appendChild(em);box.appendChild(pw);box.appendChild(m);box.appendChild(row);ov.appendChild(box);document.body.appendChild(ov);paint();em.focus();}
-function acctSignOut(){function done(){try{localStorage.removeItem("be-uid");localStorage.removeItem("be-email");localStorage.removeItem("expense-tracker-demo-v1");localStorage.setItem("be-demo","1");}catch(e){}location.reload();}
+function acctSignOut(){function done(){try{localStorage.removeItem("be-uid");localStorage.removeItem("be-email");localStorage.removeItem("expense-tracker-demo-v1");localStorage.setItem("be-demo","0");}catch(e){}location.reload();}
  try{sbLoad(function(){sbClient().auth.signOut().then(done).catch(done);});}catch(e){done();}}
 function signOutGate(){var so=cards.filter(function(x){var h=x.querySelector("h2");return h&&h.textContent.replace(/[▲▼]/g,"").trim()==="Sign out";})[0];if(!so)return;so.classList.toggle("nobk",!UID);var box=$("soBox");if(!box||!UID)return;box.innerHTML="";var a1=document.createElement("button");a1.className="p";a1.style.width="100%";a1.textContent="Sign out";a1.onclick=acctSignOut;box.appendChild(a1);var d1=document.createElement("button");d1.textContent="Delete account";d1.style.cssText="width:100%;margin-top:8px;background:#c62828;color:#fff;border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer";d1.onclick=acctDelete;box.appendChild(d1);}
 function backupGate(){signOutGate();var c=cards.filter(function(x){var h=x.querySelector("h2");return h&&h.textContent.replace(/[▲▼]/g,"").trim()==="Backup";})[0];if(!c)return;c.classList.toggle("nobk",!!DEMO);var bb=$("bkBox"),nd=$("bkNeed");if(bb)bb.style.display=UID?"":"none";if(nd)nd.style.display=UID?"none":"";}
@@ -1115,6 +1118,7 @@ function fidUnlock(){var id=fidGet(),m=document.getElementById("lkFidMsg");if(!i
  navigator.credentials.get({publicKey:{challenge:rnd(32),rpId:location.hostname,allowCredentials:[{type:"public-key",id:unb64u(id)}],userVerification:"required",timeout:60000}})
  .then(function(){lockHide();}).catch(function(){if(m)m.textContent="Face ID didn’t work. Use your PIN.";});}
 function signedIn(){try{return !!localStorage.getItem("be-uid");}catch(e){return false;}}
+function demoOn(){try{return localStorage.getItem("be-demo")==="1";}catch(e){return false;}}
 function lkRender(){var el=document.getElementById("lkSet");if(!el)return;el.innerHTML="";var on=!!pinGet();
  var msg=document.createElement("div");msg.style.cssText="color:var(--mut);font-size:14px;margin-bottom:10px";
  msg.textContent=on?"The lock is on. The app asks for your PIN when it opens or comes back from the background.":(signedIn()?"The lock is off. Create a 4-digit PIN to lock the app.":"The lock is off.");el.appendChild(msg);
@@ -1138,11 +1142,11 @@ function lkRender(){var el=document.getElementById("lkSet");if(!el)return;el.inn
  else if(on){var n=document.createElement("div");n.style.cssText="color:var(--mut);font-size:13px;margin-top:8px";n.textContent="Face ID needs Safari on this site (the GitHub Pages address).";el.appendChild(n);}
 }
 lkRender();
-if(pinGet())lockShow();
-var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
+if(pinGet()&&signedIn()&&!demoOn())lockShow();
+var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&signedIn()&&!demoOn()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-27c",busy=false;
+(function(){var APP_BUILD="2026-11-27d",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
