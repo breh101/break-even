@@ -237,7 +237,7 @@ h2{display:block;text-align:center;justify-content:center}
 <div class="stats" style="margin-top:10px"><div class="stat"><small>Left to pay</small><b id="bLeft">$0.00</b></div><div class="stat"><small>Paid this month</small><b id="bPaid">$0.00</b></div></div>
 <div id="bList" style="margin-top:10px"></div>
 
-<div id="bScopeRow" style="display:none;margin-top:8px"><label>Change</label><select id="bScope"><option value="all">Every month</option><option value="month">Only the month shown</option></select></div><div id="bMgr"></div>
+<div id="bScopeRow" style="display:none;margin-top:8px"><label>Change</label><select id="bScope"><option value="all">This month and every month after</option><option value="month">Only this month</option></select></div><div id="bMgr"></div>
 <button class="p" id="addBillBtn" style="margin-top:10px">+ Add bill</button>
 <div id="bForm" style="display:none;border-top:1px solid var(--bd);margin-top:10px;padding-top:10px">
 <div id="bMode" class="hint" style="display:none"></div>
@@ -292,6 +292,7 @@ setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("clo
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
 var UPD_SEED_AFTER="2026-11-25";
 var UPDATES=[
+{d:"2026-11-27",t:"When you edit a bill, “This month and every month after” keeps earlier months as they were."},
 {d:"2026-11-25",t:"If your budget is missing after signing in, the Account section can bring in the budget saved on this device."},
 {d:"2026-11-25",t:"The Sign out button on the More page only appears when you are signed in or viewing the sample app."},
 {d:"2026-11-25",t:"A PIN can only be created after you sign in."},
@@ -444,7 +445,7 @@ function occurrences(b,ym){
  if(diff>=0&&diff%step===0)return [bdate(ym,+st.slice(8,10))];
  return [];
 }
-function effBill(b,ym){var o=(S.billOv&&S.billOv[ym]&&S.billOv[ym][b.id])||{};return {id:b.id,name:o.name||b.name,amt:o.amt!=null?o.amt:b.amt,day:o.day||b.day,cat:o.cat||b.cat,acct:o.acct||b.acct,freq:b.freq||"monthly",start:b.start};}
+function effBill(b,ym){var e={name:b.name,amt:b.amt,day:b.day,cat:b.cat,acct:b.acct,freq:b.freq||"monthly",start:b.start};(b.hist||[]).slice().sort(function(x,y){return x.from<y.from?-1:x.from>y.from?1:0;}).forEach(function(h){if(h.from<=ym){Object.keys(h).forEach(function(k){if(k!=="from")e[k]=h[k];});}});var o=(S.billOv&&S.billOv[ym]&&S.billOv[ym][b.id])||{};return {id:b.id,name:o.name||e.name,amt:o.amt!=null?o.amt:e.amt,day:o.day||e.day,cat:o.cat||e.cat,acct:o.acct||e.acct,freq:e.freq,start:e.start};}
 function billManual(t){if(t.type!=="expense"||t.billId)return false;var n=(t.note||"").trim().toLowerCase();if(!n)return false;var ym=t.date.slice(0,7);return S.bills.some(function(b){return (b.name||"").trim().toLowerCase()===n&&occurrences(b,ym).length>0;});}
 function billTx(b,due){for(var i=0;i<S.tx.length;i++){var t=S.tx[i];if(t.billId!==b.id)continue;if(t.billDue?t.billDue===due:(!t.billDue&&t.billMonth===due.slice(0,7)))return t;}
  var mn=(b.name||"").trim().toLowerCase(),ym=due.slice(0,7);for(var k=0;k<S.tx.length;k++){var u=S.tx[k];if(!u.billId&&u.type==="expense"&&(u.note||"").trim().toLowerCase()===mn&&u.date.slice(0,7)===ym)return u;}return null;}
@@ -462,7 +463,7 @@ function openBillSheet(title){openFormSheet("bills","bForm",title);}
 function fillBCat(v){var s=$("bcat");s.innerHTML="";var mk=function(c,p){var o=document.createElement("option");o.value=o.textContent=c;p.appendChild(o);};if(S.secs.length){groups().forEach(function(g){var og=document.createElement("optgroup");og.label=g[0];g[1].forEach(function(c){mk(c,og);});s.appendChild(og);});}else CATS.forEach(function(c){mk(c,s);});var all=[].map.call(s.options,function(o){return o.value;});s.value=v&&all.indexOf(v)>-1?v:(all.indexOf("Misc")>-1?"Misc":(all[0]||""));}
 function bformReset(){fillBCat("Misc");restoreBillForm();$("bn").value="";$("ba").value="";$("bd").value="";$("bsd").value="";$("bF").value="monthly";$("bF").disabled=false;bfTog();BEDIT=null;$("bScopeRow").style.display="none";$("bsave").textContent="Add bill";$("bcan").style.display="none";$("bMode").style.display="none";}
 function bformLoad(b,mode,ym){BEDIT={id:b.id,ym:ym};var openedNow=!FSHEET["bills"];var base=S.bills.filter(function(z){return z.id===b.id;})[0]||b;$("bn").value=b.name;$("ba").value=String(b.amt);$("bd").value=String(b.day||base.day||"");$("bsd").value=base.start||"";$("bF").value=base.freq||"monthly";$("bA").value=String(b.acct||fundAccId());fillBCat(base.cat||b.cat||"Misc");$("bScopeRow").style.display="";$("bScope").value=mode==="month"?"month":"all";$("bcan").style.display="";bScopeTog();if(openedNow)openBillSheet("Edit bill");}
-function bScopeTog(){var m=$("bScope").value==="month";var ml=new Date((BEDIT?BEDIT.ym:BMON)+"-01T12:00:00").toLocaleString("en-US",{month:"long",year:"numeric"});$("bF").disabled=m;bfTog();var md=$("bMode");md.style.display="";md.textContent=m?"Changing "+ml+" only. Other months keep their amounts.":"Changing every month, including future months.";$("bsave").textContent=m?"Save for "+ml:"Save for every month";}
+function bScopeTog(){var m=$("bScope").value==="month";var ml=new Date((BEDIT?BEDIT.ym:BMON)+"-01T12:00:00").toLocaleString("en-US",{month:"long",year:"numeric"});$("bF").disabled=m;bfTog();var md=$("bMode");md.style.display="";md.textContent=m?"Changing "+ml+" only. Other months keep their amounts.":"Changing this month and every month after. Earlier months keep their amounts.";$("bsave").textContent=m?"Save for "+ml:"Save from this month on";}
 function bSTog(){}
 function renderBills(){
  var ym=BMON;var rows=[];
@@ -720,7 +721,7 @@ $("bsave").onclick=function(){var nm=$("bn").value.trim(),am=parseFloat($("ba").
  var monthOnly=BEDIT!==null&&$("bScope").value==="month";
  var vals={name:nm,amt:Math.round(am*100)/100,acct:Number($("bA").value)||fundAccId(),cat:$("bcat").value||"Misc"};
  if(BEDIT!==null&&monthOnly){var ov={name:vals.name,amt:vals.amt,acct:vals.acct,cat:vals.cat};if(fq==="monthly")ov.day=dy;S.billOv[BEDIT.ym]=S.billOv[BEDIT.ym]||{};S.billOv[BEDIT.ym][BEDIT.id]=ov;}
- else if(BEDIT!==null){vals.freq=fq;if(fq==="monthly")vals.day=dy;else vals.start=sd;var eb=S.bills.filter(function(z){return z.id===BEDIT.id;})[0];if(eb){Object.assign(eb,vals);if(fq==="monthly")delete eb.start;else delete eb.day;}}
+ else if(BEDIT!==null){vals.freq=fq;if(fq==="monthly")vals.day=dy;else vals.start=sd;var eb=S.bills.filter(function(z){return z.id===BEDIT.id;})[0];if(eb){var rec=Object.assign({from:BEDIT.ym},vals);if(fq==="monthly")delete rec.start;else delete rec.day;eb.hist=(eb.hist||[]).filter(function(h){return h.from<BEDIT.ym;});eb.hist.push(rec);}}
  else{vals.freq=fq;if(fq==="monthly")vals.day=dy;else vals.start=sd;S.bills.push(Object.assign({id:Date.now(),cat:"Misc"},vals));}
  bformReset();save();render();renderBills();};
 $("bF").onchange=bfTog;
@@ -1138,7 +1139,7 @@ if(pinGet())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-25s",busy=false;
+(function(){var APP_BUILD="2026-11-27a",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
