@@ -70,7 +70,7 @@ h2{color:var(--gold);padding-bottom:6px;border-bottom:2px solid var(--gold);font
 .ibtn{background:none;border:0;font-size:22px;width:40px;height:40px;padding:0;cursor:pointer;color:var(--ink,inherit);flex:none}
 #exp{color:var(--ac)}
 .sub{color:var(--gold);font-weight:700}
-.k-checking{--kc:var(--ac)}.k-fund{--kc:var(--gold)}.k-card{--kc:var(--slate)}
+.nofund #fpRow,.nofund #fundRow,.nofund #fundStats,.nofund #accLblF,.nofund #pFundRow,.nofund #faRow,.nofund #ffRow,.nofund #ffHint,.nofund #fiRow,.nofund #fnRow{display:none!important}.k-checking{--kc:var(--ac)}.k-fund{--kc:var(--gold)}.k-card{--kc:var(--slate)}
 .ac{background:var(--bg);border:1px solid var(--bd);border-left:5px solid var(--kc);border-radius:12px;padding:10px 12px;margin-bottom:10px}
 .ac:first-child{padding-top:10px;border-top:1px solid var(--bd)}
 .ac input[type=text],.ac>div:first-child b{color:var(--kc)}
@@ -99,14 +99,15 @@ h2{display:block;text-align:center;justify-content:center}
 <h2>Monthly Overview</h2>
 <div class="row" style="flex-wrap:nowrap;align-items:center;margin-top:16px;padding-top:4px"><button class="nav" id="mp" aria-label="Previous month">‹</button><input type="month" id="month" style="display:none"><div id="mLabel" style="flex:1;text-align:center;font-weight:700;font-size:15px;align-self:center"></div><button class="nav" id="mn" aria-label="Next month">›</button></div>
 <div style="text-align:center;margin-top:8px"><button class="p" id="mtoday" style="width:auto;margin:0;padding:8px 22px;font-size:14px;border-radius:999px;display:inline-block">This month</button></div>
-<div style="margin-top:12px"><div class="sub" style="margin:0 0 6px">Available before payday</div><div style="text-align:center;margin-bottom:10px"><small style="color:var(--mut)">Total in your accounts (excluding next month’s fund)</small><div class="big" id="exp">$0.00</div><div id="accSub" style="margin:8px auto 0;max-width:320px;text-align:left;font-size:14px"></div></div><div style="max-width:320px;margin:-10px auto 0;font-size:14px;display:flex;justify-content:space-between;align-items:center;padding:3px 0"><span>Income this month</span><b class="pos" id="sIn">$0</b></div><div id="incBreak"></div><div style="max-width:320px;margin:0 auto;font-size:14px;display:flex;justify-content:space-between;align-items:center;padding:3px 0"><span>Total spent this month</span><b id="spentLine">$0.00</b></div><div id="bpVal" class="big" style="font-size:40px;text-align:center;margin:6px 0">$0.00</div><small id="bpNote" style="color:var(--mut);display:block;text-align:center;line-height:1.5"></small><div style="text-align:center;margin-top:12px"><label>Expected biweekly paycheck</label><input type="number" id="bwIn" inputmode="decimal" step="0.01" placeholder="0.00" style="max-width:200px;text-align:center"></div><div style="text-align:center;margin-top:8px"><label>Taken from each paycheck for fund</label><input type="number" id="fpIn" inputmode="decimal" step="0.01" placeholder="0.00" style="max-width:200px;text-align:center"></div></div>
+<div style="margin-top:12px"><div class="sub" style="margin:0 0 6px">Available before payday</div><div style="text-align:center;margin-bottom:10px"><small style="color:var(--mut)">Total in your accounts<span id="accLblF"> (excluding next month’s fund)</span></small><div class="big" id="exp">$0.00</div><div id="accSub" style="margin:8px auto 0;max-width:320px;text-align:left;font-size:14px"></div></div><div style="max-width:320px;margin:-10px auto 0;font-size:14px;display:flex;justify-content:space-between;align-items:center;padding:3px 0"><span>Income this month</span><b class="pos" id="sIn">$0</b></div><div id="incBreak"></div><div style="max-width:320px;margin:0 auto;font-size:14px;display:flex;justify-content:space-between;align-items:center;padding:3px 0"><span>Total spent this month</span><b id="spentLine">$0.00</b></div><div id="bpVal" class="big" style="font-size:40px;text-align:center;margin:6px 0">$0.00</div><small id="bpNote" style="color:var(--mut);display:block;text-align:center;line-height:1.5"></small><div style="text-align:center;margin-top:12px"><label>Expected biweekly paycheck</label><input type="number" id="bwIn" inputmode="decimal" step="0.01" placeholder="0.00" style="max-width:200px;text-align:center"></div><div id="fpRow" style="text-align:center;margin-top:8px"><label>Taken from each paycheck for fund</label><input type="number" id="fpIn" inputmode="decimal" step="0.01" placeholder="0.00" style="max-width:200px;text-align:center"></div></div>
 <div style="border-top:1px solid var(--bd);margin-top:14px;padding-top:12px">
 <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Monthly fund</div>
-<div class="row">
+<label class="chk" style="margin:0 0 8px"><input type="checkbox" id="fundOnChk"> Use a monthly fund (set money aside for next month)</label>
+<div class="row" id="fundRow">
 <div><label>Fund balance when you started</label><input type="number" id="fs" inputmode="decimal" step="0.01" placeholder="0.00"></div>
 <div><label>Monthly target</label><input type="number" id="ft" inputmode="decimal" step="0.01" placeholder="1600"></div>
 </div>
-<div class="stats" style="margin-top:10px">
+<div class="stats" id="fundStats" style="margin-top:10px">
 <div class="stat"><small>Left for this month</small><b id="fLeft">$0.00</b></div>
 <div class="stat"><small>Added for next month</small><b id="fAdd">$0.00</b></div>
 <div class="stat"><small>Fund balance now</small><b id="fBal">$0.00</b></div>
@@ -294,6 +295,7 @@ setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("clo
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
 var UPD_SEED_AFTER="2026-11-25";
 var UPDATES=[
+{d:"2026-11-27",t:"The monthly fund is optional. Turn it on or off with the checkbox in the Monthly fund section on the home screen."},
 {d:"2026-11-27",t:"App lock and Backup show a note when you are not signed in, explaining they are available after you sign in."},
 {d:"2026-11-27",t:"The sample budget no longer shows Account or App lock. Sign in and Create account are on the home screen."},
 {d:"2026-11-27",t:"Tap the bell again to close Notifications and return to the page you were on."},
@@ -403,7 +405,7 @@ function pfTog(){var show=false;$("pfRow").style.display=show?"":"none";if(!show
 function secCls(n){var i=S.secs.indexOf(n);return " sec s"+(i<0?6:i%6);}
 var INC_DEFAULT=["Paycheck","Cash back","Interest","Other income","Refunds"];
 function isIncomeCat(c){if(INC_DEFAULT.indexOf(c)>-1)return true;var inc=S.tx.some(function(t){return t.cat===c&&(t.type==="income"||t.type==="interest");});var exp=S.tx.some(function(t){return t.cat===c&&t.type==="expense";});return inc&&!exp;}
-function fundCat(c){return !!(S.fundCats&&c&&S.fundCats[c]);}
+function fundCat(c){return !!(fundOn()&&S.fundCats&&c&&S.fundCats[c]);}
 function cardFunded(id){var f=S.accts.filter(function(a){return String(a.id)===String(id);})[0];return !!(f&&f.kind==="card"&&f.fundCard);}
 function kindOf(id){var f=S.accts.filter(function(a){return String(a.id)===String(id);})[0];return f?(f.kind||"checking"):"";}
 function isFI(t){if(t.fi!==undefined)return !!t.fi;return t.type==="interest"&&kindOf(t.acct)==="fund";}
@@ -579,7 +581,7 @@ var w=document.createElement("div");w.className="ac k-"+(a.kind||"checking");
 var h=document.createElement("div");h.style.cssText="display:flex;flex-wrap:wrap;align-items:center;gap:6px";
 var n=document.createElement("input");n.type="text";n.value=a.name;n.setAttribute("aria-label","Account name");n.style.cssText="font-weight:700;flex:1 1 100%";n.oninput=function(){a.name=this.value.trim()||"Account";save();fillSel($("acc"));fillSel($("acc2"),true);fillPf();render();};var e=document.createElement("b");
 e.style.flex="1";h.appendChild(n);h.appendChild(e);w.appendChild(h);
-var kr=document.createElement("div");kr.className="row";kr.style.marginTop="6px";var kd=document.createElement("div"),kl=document.createElement("label"),ks=document.createElement("select");kl.textContent="Account type";[["checking","Checking"],["fund","Monthly fund account"],["card","Credit card"]].forEach(function(o){var op=document.createElement("option");op.value=o[0];op.textContent=o[1];ks.appendChild(op);});ks.value=a.kind||"checking";ks.onchange=function(){a.kind=this.value;save();buildAcc();render();};kd.appendChild(kl);kd.appendChild(ks);kr.appendChild(kd);w.appendChild(kr);
+var kr=document.createElement("div");kr.className="row";kr.style.marginTop="6px";var kd=document.createElement("div"),kl=document.createElement("label"),ks=document.createElement("select");kl.textContent="Account type";[["checking","Checking"],["fund","Monthly fund account"],["card","Credit card"]].filter(function(o){return o[0]!=="fund"||fundOn()||a.kind==="fund";}).forEach(function(o){var op=document.createElement("option");op.value=o[0];op.textContent=o[1];ks.appendChild(op);});ks.value=a.kind||"checking";ks.onchange=function(){a.kind=this.value;save();buildAcc();render();};kd.appendChild(kl);kd.appendChild(ks);kr.appendChild(kd);w.appendChild(kr);
 
 var r=document.createElement("div");r.className="row";r.style.marginTop="6px";
 if(a.kind!=="card")r.appendChild(field("Starting balance",a.start,function(v){a.start=v;save();render();}));
@@ -604,7 +606,11 @@ psub={};groups(planOK).forEach(function(g){if(g[0]&&g[1].length){var sh=document
 $("fs").value=S.fs;$("ft").value=S.ft;$("pmon").value=PM;loadPlanInputs();
 
 function setMonth(ym){var ml=$("bmLabel"),vis=!!(ml&&ml.offsetParent),before=vis?ml.getBoundingClientRect().top:0;BMON=ym;PM=ym;$("month").value=ym;try{$("pmon").value=ym;}catch(e){}render();renderBills();loadPlanInputs();if(vis){var d=ml.getBoundingClientRect().top-before;if(d)try{window.scrollTo(0,(window.scrollY||0)+d);}catch(e){}}}
+function fundOn(){if(S.fundOn!==undefined)return !!S.fundOn;return !!(parseFloat(S.fs)||S.fpp!==undefined||(S.tx||[]).some(function(t){return t.type==="fund"||t.ff||t.fi||t.fundAmt!=null;})||Object.keys(S.fundCats||{}).length>0);}
+var FUNDOPT={};
+function applyFundVis(){var on=fundOn();document.body.classList.toggle("nofund",!on);var fc=$("fundOnChk");if(fc)fc.checked=on;var ts=$("type");if(!ts)return;var o=ts.querySelector('option[value="fund"]');if(!on){if(ts.value==="fund")ts.value="expense";if(o){FUNDOPT.node=o;FUNDOPT.next=o.nextSibling;ts.removeChild(o);}}else if(!o&&FUNDOPT.node){ts.insertBefore(FUNDOPT.node,FUNDOPT.next&&FUNDOPT.next.parentNode===ts?FUNDOPT.next:null);FUNDOPT.node=null;}}
 function render(){
+applyFundVis();
 fillFilt();
 try{if($("bwIn")&&document.activeElement!==$("bwIn"))$("bwIn").value=S.bw||"";if($("fpIn")&&document.activeElement!==$("fpIn"))$("fpIn").value=S.fpp===undefined?"1600":S.fpp;}catch(e){}
 var m=$("month").value;try{$("mLabel").textContent=new Date(m+"-01T12:00:00").toLocaleString("en-US",{month:"long",year:"numeric"});}catch(e){}
@@ -635,12 +641,12 @@ try{var tym=BMON,tadd=fsplit(tym).add,base=exp-tadd;
  var bl=0,ovA=0,vr=0;
  S.bills.map(function(b){return effBill(b,tym);}).forEach(function(b){occurrences(b,tym).forEach(function(due){var tx2=billTx(b,due);if(!tx2)bl+=b.amt;else if(tx2.amt>b.amt)ovA+=tx2.amt-b.amt;});});
  S.vbudgets.forEach(function(v){var s3=0;S.tx.forEach(function(t){if(t.type==="expense"&&t.cat===v.cat&&t.date.slice(0,7)===tym)s3+=t.amt;});var rv=vbEff(v,tym)-s3;if(rv>0)vr+=rv;else ovA+=-rv;});
- var prIn=0,prN=0;S.tx.forEach(function(t){if(t.date.slice(0,7)===tym&&t.type==="income"&&t.cat==="Paycheck"){prIn+=t.amt;prN++;}});var nPay=Object.keys(paydayKeys(tym)).length,bwv=parseFloat(S.bw)||0;var expInc=bwv>0?Math.round(bwv*nPay*100)/100:(parseFloat(planFor(tym).inc)||0);var fpp=S.fpp===undefined?1600:(parseFloat(S.fpp)||0),remN=Math.max(0,nPay-prN);var toCome=bwv>0?Math.round(Math.max(0,bwv-fpp)*remN*100)/100:Math.round(Math.max(0,expInc-prIn)*100)/100;
+ var prIn=0,prN=0;S.tx.forEach(function(t){if(t.date.slice(0,7)===tym&&t.type==="income"&&t.cat==="Paycheck"){prIn+=t.amt;prN++;}});var nPay=Object.keys(paydayKeys(tym)).length,bwv=parseFloat(S.bw)||0;var expInc=bwv>0?Math.round(bwv*nPay*100)/100:(parseFloat(planFor(tym).inc)||0);var fpp=!fundOn()?0:(S.fpp===undefined?1600:(parseFloat(S.fpp)||0)),remN=Math.max(0,nPay-prN);var toCome=bwv>0?Math.round(Math.max(0,bwv-fpp)*remN*100)/100:Math.round(Math.max(0,expInc-prIn)*100)/100;
  bl=Math.round(bl*100)/100;vr=Math.round(vr*100)/100;ovA=Math.round(ovA*100)/100;
  var bpv=Math.round((base-bl-vr+toCome)*100)/100;var bpe=$("bpVal");bpe.textContent=$$(bpv);bpe.className=bpv<0?"neg":"pos";
  $("bpNote").textContent="Accounts total "+$$(Math.round(base*100)/100)+" − unpaid bills "+$$(bl)+" − budgets left "+$$(vr)+" + paychecks still to come "+$$(toCome);
 }catch(e){}
-ckd=Math.round(ckd*100)/100;var asb=$("accSub");asb.innerHTML="";var brk=[["Checking",Math.round((exp-ckd-fnd)*100)/100],["Fund this month",Math.round((fnd-fsplit(m).add)*100)/100],["Credit card debt",Math.round(ckd*100)/100]];brk.forEach(function(rw){var rr=document.createElement("div");rr.style.cssText="display:flex;justify-content:space-between;padding:3px 0";var ln=document.createElement("span");ln.textContent=rw[0];var vv=document.createElement("b");vv.textContent=$$(rw[1]);if(rw[1]<0)vv.className="neg";rr.appendChild(ln);rr.appendChild(vv);asb.appendChild(rr);});
+ckd=Math.round(ckd*100)/100;var asb=$("accSub");asb.innerHTML="";var FON=fundOn();var brk=[["Checking",Math.round((exp-ckd-(FON?fnd:0))*100)/100]];if(FON)brk.push(["Fund this month",Math.round((fnd-fsplit(m).add)*100)/100]);brk.push(["Credit card debt",Math.round(ckd*100)/100]);brk.forEach(function(rw){var rr=document.createElement("div");rr.style.cssText="display:flex;justify-content:space-between;padding:3px 0";var ln=document.createElement("span");ln.textContent=rw[0];var vv=document.createElement("b");vv.textContent=$$(rw[1]);if(rw[1]<0)vv.className="neg";rr.appendChild(ln);rr.appendChild(vv);asb.appendChild(rr);});
 var fsp=fsplit(today.slice(0,7)),chk=0,cds=0,fbal=0,hasF=false,cbF=0,rd=function(x){return Math.round(x*100)/100;};
 S.accts.forEach(function(a){var b=rd(B[a.id]||0);if(a.kind==="card")cds+=b;else if(a.kind==="fund"){fbal+=b;hasF=true;}else chk+=b;});
 var cbK=0,cbC=0;S.tx.forEach(function(t){if((t.type==="income"||t.type==="interest")&&t.cat==="Cash back"&&!isFI(t)){var k=kindOf(t.acct);if(k==="fund")cbF+=t.amt;else if(k==="card")cbC+=t.amt;else cbK+=t.amt;}});cbK=rd(cbK);cbC=rd(cbC);
@@ -753,6 +759,7 @@ $("amt").addEventListener("input",function(){if($("sp").checked)spSum();});
 $("pin").oninput=function(){editPlan().inc=this.value;save();render();};
 $("bwIn").oninput=function(){S.bw=this.value;save();render();};
 $("fpIn").oninput=function(){S.fpp=this.value;save();render();};
+$("fundOnChk").onchange=function(){S.fundOn=this.checked;save();render();};
 $("fs").oninput=function(){S.fs=this.value;save();render();};
 $("ft").oninput=function(){S.ft=this.value;save();render();};
 var EID=null,SP=[];
@@ -844,7 +851,7 @@ function setupHams(){var first={};cards.forEach(function(c){var p=cardPage(c);if
  var pb=$("pageBills");var bc=pb?[].filter.call(pb.children,function(n){return n.classList&&n.classList.contains("card");})[0]:null;if(bc)first.bills=bc;
  Object.keys(first).forEach(function(p){var c=first[p];var h2=c.querySelector("h2");if(!h2||h2.parentNode!==c)return;var w=document.createElement("div");w.className="hwrap";c.insertBefore(w,h2);w.appendChild(h2);var b=document.createElement("button");b.className="ham";b.setAttribute("aria-label","Menu");b.textContent="\u2630";w.appendChild(b);});
 }
-function fsplit(ym){var op=parseFloat(S.fs)||0,sf=0,ad=0,le=0;S.tx.forEach(function(t){var tm=t.date.slice(0,7),dep=t.type==="fund",fx=t.type==="expense"&&kindOf(t.acct)==="fund"&&(!!t.ff||fundCat(t.cat)||billManual(t)),fe=(t.type==="income"||t.type==="interest")&&isFI(t),fm=t.type==="move"&&kindOf(t.acct)==="fund"&&kindOf(t.to)!=="fund"&&!!t.ff;var fxa=(fx&&!t.ff&&t.fundAmt!=null)?t.fundAmt:t.amt;if(fe){var tgt=t.fn==="next"?addM(tm,1):tm;if(tgt<ym)op+=t.amt;else if(tgt===ym)le+=t.amt;return;}
+function fsplit(ym){if(!fundOn())return {left:0,add:0};var op=parseFloat(S.fs)||0,sf=0,ad=0,le=0;S.tx.forEach(function(t){var tm=t.date.slice(0,7),dep=t.type==="fund",fx=t.type==="expense"&&kindOf(t.acct)==="fund"&&(!!t.ff||fundCat(t.cat)||billManual(t)),fe=(t.type==="income"||t.type==="interest")&&isFI(t),fm=t.type==="move"&&kindOf(t.acct)==="fund"&&kindOf(t.to)!=="fund"&&!!t.ff;var fxa=(fx&&!t.ff&&t.fundAmt!=null)?t.fundAmt:t.amt;if(fe){var tgt=t.fn==="next"?addM(tm,1):tm;if(tgt<ym)op+=t.amt;else if(tgt===ym)le+=t.amt;return;}
 if(!dep&&!fx&&!fe&&!fm)return;if(tm<ym)op+=(fx||fm)?-fxa:t.amt;else if(tm===ym){if(dep)ad+=t.amt;else if(fe)le+=t.amt;else sf+=fxa;}});return {left:Math.round((op-sf+le)*100)/100,add:Math.round(ad*100)/100};}
 function bars(el,map,tot,pl){el.innerHTML="";var ks=Object.keys(map).sort(function(a,b){return map[b]-map[a]});
 if(!ks.length){var em=document.createElement("div");em.className="empty";em.textContent="Nothing this month.";el.appendChild(em);return;}
@@ -1146,7 +1153,7 @@ if(pinGet()&&signedIn()&&!demoOn())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&signedIn()&&!demoOn()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-27g",busy=false;
+(function(){var APP_BUILD="2026-11-27h",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
