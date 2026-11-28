@@ -32,7 +32,7 @@ input::-webkit-date-and-time-value{text-align:left;min-height:1.2em}
 .chk input{height:auto}.pl input{height:38px}
 select{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%238a8f98' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
 .p{padding:11px 14px;border:0;border-radius:10px;background:var(--ac);color:#fff;font-weight:600;width:100%;margin-top:10px}
-.rm{background:none;border:0;color:var(--mut);padding:0;margin-top:6px;font-size:13px;text-decoration:underline}
+.rm{background:none;border:0;color:var(--mut);padding:0;margin-top:6px;font-size:13px;text-decoration:underline}.rmacct{color:#c62828;font-weight:600}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .stat{background:var(--bg);border-radius:10px;padding:10px;display:flex;flex-direction:column;justify-content:space-between;gap:2px}
 .stat b{display:block;font-size:19px}
@@ -295,6 +295,7 @@ setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("clo
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
 var UPD_SEED_AFTER="2026-11-25";
 var UPDATES=[
+{d:"2026-11-27",t:"Remove account is now highlighted in red so it is easier to find."},
 {d:"2026-11-27",t:"Removing an account keeps its past transactions in your history. They still show their original account name."},
 {d:"2026-11-27",t:"The monthly fund is optional. Turn it on or off with the checkbox in the Monthly fund section on the home screen."},
 {d:"2026-11-27",t:"App lock and Backup show a note when you are not signed in, explaining they are available after you sign in."},
@@ -591,7 +592,7 @@ r.appendChild(field(a.kind==="card"?"Amount you owe now (− if it’s a credit)
 w.appendChild(r);
 var d=document.createElement("small");d.style.cssText="color:var(--mut);display:block;margin-top:4px";w.appendChild(d);
 var cnt=S.tx.filter(function(t){return t.acct===a.id||t.to===a.id||t.pf===a.id}).length;
-if(S.accts.length>1){var x=document.createElement("button");x.className="rm";x.textContent="Remove account";var armed2=false;x.onclick=function(){if(cnt&&!armed2){armed2=true;x.textContent="Tap again to remove. "+cnt+" past entries stay in your history.";return;}if(!S.archived)S.archived=[];S.archived.push(a);S.accts=S.accts.filter(function(z){return z.id!==a.id});save();buildAcc();render();};w.appendChild(x);}
+if(S.accts.length>1){var x=document.createElement("button");x.className="rm rmacct";x.textContent="Remove account";var armed2=false;x.onclick=function(){if(cnt&&!armed2){armed2=true;x.textContent="Tap again to remove. "+cnt+" past entries stay in your history.";return;}if(!S.archived)S.archived=[];S.archived.push(a);S.accts=S.accts.filter(function(z){return z.id!==a.id});save();buildAcc();render();};w.appendChild(x);}
 if(a.kind==="card"&&String(a.id)===ap.value){var pbx=$("pBox");if(pbx){pbx.style.display="";$("pCard").value=String(a.id);w.appendChild(pbx);PBPLACED=true;}}
 L.appendChild(w);AR[a.id]={e:e,d:d};});
 if(!PBPLACED){$("pBox").style.display="none";}
@@ -1155,7 +1156,7 @@ if(pinGet()&&signedIn()&&!demoOn())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&signedIn()&&!demoOn()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-27i",busy=false;
+(function(){var APP_BUILD="2026-11-27j",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
