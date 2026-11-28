@@ -295,6 +295,7 @@ setTimeout(function(){try{cloudInit();}catch(e){try{document.getElementById("clo
 var DEMO=false;try{DEMO=localStorage.getItem("be-demo")==="1";}catch(e){}
 var UPD_SEED_AFTER="2026-11-25";
 var UPDATES=[
+{d:"2026-11-27",t:"You can split an existing entry into parts when you edit it. Saving the split replaces the original entry."},
 {d:"2026-11-27",t:"Remove account is now highlighted in red so it is easier to find."},
 {d:"2026-11-27",t:"Removing an account keeps its past transactions in your history. They still show their original account name."},
 {d:"2026-11-27",t:"The monthly fund is optional. Turn it on or off with the checkbox in the Monthly fund section on the home screen."},
@@ -693,7 +694,7 @@ rt.appendChild(amt);rt.appendChild(ed);rt.appendChild(x);r.appendChild(l);r.appe
 $("addEntryBtn").onclick=function(){if(EID!==null)endEdit();openFormSheet("entries","entryForm","Add entry");};
 $("add").onclick=function(){
 var a=parseFloat($("amt").value);if(!a||!$("date").value){$("amt").focus();return;}
-if($("sp").checked&&$("type").value==="expense"&&EID===null){if(a<0){$("amt").focus();return;}doSplit(Math.round(a*100)/100);return;}
+if($("sp").checked&&$("type").value==="expense"){if(a<0){$("amt").focus();return;}doSplit(Math.round(a*100)/100);return;}
 var ty=$("type").value,e2=ty==="expense",ac=Number($("acc").value),to=$("acc2").value?Number($("acc2").value):0;
 if((ty==="fund"||ty==="move")&&a<0){$("amt").focus();return;}
 if(ty==="move"&&(!to||to===ac)){$("acc2").focus();return;}
@@ -767,7 +768,7 @@ $("fs").oninput=function(){S.fs=this.value;save();render();};
 $("ft").oninput=function(){S.ft=this.value;save();render();};
 var EID=null,SP=[];
 function setToday(f){var n=new Date(),d=new Date(n.getTime()-n.getTimezoneOffset()*60000).toISOString().slice(0,10);if(f||$("date").value===today)$("date").value=d;today=d;}
-function spTog(){var e=$("type").value==="expense"&&EID===null;$("spRow").style.display=e?"":"none";if(!e)$("sp").checked=false;var on=e&&$("sp").checked;$("spBox").style.display=on?"":"none";$("accRow").style.display=on?"none":"";$("expRow").style.display=on?"none":"";if(on)$("ffRow").style.display="none";}
+function spTog(){var e=$("type").value==="expense"&&!(EID!==null&&S.tx.some(function(z){return z.id===EID&&z.g;}));$("spRow").style.display=e?"":"none";if(!e)$("sp").checked=false;var on=e&&$("sp").checked;$("spBox").style.display=on?"":"none";$("accRow").style.display=on?"none":"";$("expRow").style.display=on?"none":"";if(on)$("ffRow").style.display="none";}
 function newPart(){return {amt:"",cat:$("cat").value||CATS[0]||"",acct:$("acc").value,ff:false};}
 function spSum(){var tot=Math.round((parseFloat($("amt").value)||0)*100)/100,sum=0;SP.forEach(function(p){sum+=Math.round((parseFloat(p.amt)||0)*100)/100;});sum=Math.round(sum*100)/100;var d=Math.round((tot-sum)*100)/100;
 $("spSum").textContent=d<0?"The parts add up to "+$$(sum)+", which is more than the "+$$(tot)+" total.":"Your parts: "+$$(sum)+" of "+$$(tot)+(d>0?". The other "+$$(d)+" is paid by someone else and isn\u2019t counted.":". Nothing left for anyone else.");}
@@ -786,6 +787,7 @@ L.appendChild(w);});}
 function doSplit(total){var ps=SP.filter(function(p){return parseFloat(p.amt)>0;}),sum=0;ps.forEach(function(p){sum+=Math.round(parseFloat(p.amt)*100)/100;});
 if(!ps.length||sum>total+0.004){$("spSum").textContent=!ps.length?"Enter an amount for at least one part.":"The parts add up to more than the total.";return;}
 var g=Date.now(),d=$("date").value,nt=$("note").value.trim();
+if(EID!==null){var oldId=EID;endEdit();S.tx=S.tx.filter(function(z){return z.id!==oldId;});}
 ps.forEach(function(p,i){S.tx.push({id:g+i,date:d,type:"expense",amt:Math.round(parseFloat(p.amt)*100)/100,note:nt,cat:p.cat,ff:!!p.ff,acct:Number(p.acct),g:g,tot:total});});
 $("amt").value="";$("note").value="";$("sp").checked=false;SP=[];buildSp();tog();setToday(true);save();$("month").value=d.slice(0,7);buildAcc();buildPlan();loadPlanInputs();render();}
 function startEdit(t){EID=t.id;try{$("fa").value=t.fundAmt!=null?String(t.fundAmt):"";}catch(e){}$("date").value=t.date;$("type").value=t.type;tog();$("amt").value=t.amt;$("note").value=t.note||"";fillSel($("acc"));fillSel($("acc2"),true);$("acc").value=t.acct;$("acc2").value=t.to||"";if(t.cat&&[].every.call($("cat").options,function(o){return o.value!==t.cat})){var oo=document.createElement("option");oo.value=oo.textContent=t.cat;$("cat").appendChild(oo);}if(t.type==="expense"||t.cat)$("cat").value=t.cat||"Misc";if(!$("cat").value)$("cat").selectedIndex=0;$("ff").checked=!!t.ff;$("fi").checked=isFI(t);$("fn").value=t.fn==="next"?"next":"this";$("pf").value=t.pf||"";tog();$("add").textContent="Save changes";$("cancel").style.display="";openFormSheet("entries","entryForm","Edit entry");}
@@ -1156,7 +1158,7 @@ if(pinGet()&&signedIn()&&!demoOn())lockShow();
 var LK_AWAY=0;document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){LK_AWAY=Date.now();return;}if(pinGet()&&signedIn()&&!demoOn()&&LK_AWAY&&Date.now()-LK_AWAY>60000)lockShow();LK_AWAY=0;});
 
 /* ---- check for a newer deployed version and reload ---- */
-(function(){var APP_BUILD="2026-11-27j",busy=false;
+(function(){var APP_BUILD="2026-11-27k",busy=false;
 function overlayOpen(){return !!(document.querySelector('[style*="rgba(0,0,0,.45)"]')||document.getElementById("pinModalOv")||document.getElementById("sbModalOv"));}
 function check(){if(busy)return;busy=true;
  fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){busy=false;
